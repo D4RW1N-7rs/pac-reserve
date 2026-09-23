@@ -59,11 +59,11 @@ def load_config(filename: str) -> dict:
         
     return default_config
 
-if __name__ == "__main__":
-    config = load_config("config.json")
+def validate_config(config_file: dict) -> bool:
+    config = load_config(config_file)
     filename_parts = config["highscore_filename"].split(".")
     if len(filename_parts) != 2 or filename_parts[-1] not in ("txt", "json"):
         print(f"High score file must have exactly one .txt or .json extension: {config['highscore_filename']}")
         exit(1)
-    print("Loaded Configuration:", config)
+    return config
 

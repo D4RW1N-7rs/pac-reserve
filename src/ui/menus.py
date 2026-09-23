@@ -55,7 +55,7 @@ def draw_help(window: pygame.Surface, font: pygame.font.Font) -> None:
     ("Avoid ghosts — you lose a life on contact",  (255, 255, 255)),
     ("Eat a Power Pellet to make ghosts edible",  (255, 255, 255)),
     ("Eat an edible ghost for bonus points",  (255, 255, 255)),
-    ("Complete all 5 levels to win",  (255, 255, 255)),
+    ("Complete all 3 levels to win",  (255, 255, 255)),
     ("Each level has a time limit — don't be slow!",  (255, 255, 255)),
     ("SCORING",               (255, 200, 0)),
     ("Dot           : +10",   (255, 255, 255)),

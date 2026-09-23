@@ -8,8 +8,12 @@ UI renderer and persistent scores to the high-score system.
 import pygame
 import time
 from enum import Enum, auto
+
+from .ui.renderer import draw_maze
 from .ui import menus
 from .systems import highscore
+from .systems.maze_integration import create_maze
+from .systems.config_loader import load_config
 
 class GameState(Enum):
     MENU = auto()
@@ -21,7 +25,7 @@ class GameState(Enum):
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
 FPS = 60
-BACKGROUND_COLOR = (0, 0, 0) #black
+BACKGROUND_COLOR = (0, 0, 0)
 
 def point_in_box(px: int, py: int, x: int, y: int, w: int, h: int) -> bool:
     """Check whether a point falls inside a rectangular box."""
@@ -31,9 +35,22 @@ def centered_x(image: pygame.Surface) -> int:
     """Calculate the X coordinate to center an image on the screen."""
     return (WINDOW_WIDTH - image.get_width()) // 2
 
+def center_window(native_window: pygame.window.Window, width: int, height: int) -> pygame.Surface:
+    """Resize the native window and place its center at the desktop center."""
+    native_window.size = (width, height)
+    window_width, window_height = native_window.size
+    screen_width, screen_height = pygame.display.get_desktop_sizes()[0]
+    native_window.position = (
+        (screen_width - window_width) // 2,
+        (screen_height - window_height) // 2,
+    )
+    return native_window.get_surface()
+
 def run() -> None:
     pygame.init()
     window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    native_window = pygame.window.Window.from_display_module()
+    window = center_window(native_window, WINDOW_WIDTH, WINDOW_HEIGHT)
     pygame.display.set_caption("PAC-MAN")
 
     assets = menus.load_assets()
@@ -62,6 +79,14 @@ def run() -> None:
 
     current_state = GameState.MENU
 
+    TILE = 32
+    HUD_HEIGHT = 60
+    PADDING = 16
+    config = load_config("config.json")
+    current_level = 3
+    level_data = config["levels"][current_level - 1]
+    maze = None 
+
     running = True
     while running:
         frame_start = time.time()
@@ -73,14 +98,16 @@ def run() -> None:
                 px, py = event.pos
                 if current_state == GameState.MENU:
                     if point_in_box(px, py, play_x, play_y, play_image.get_width(), play_image.get_height()):
-                        # current_state = GameState.PLAYING
-                        print("play clicked")
+                        level_data = config["levels"][current_level - 1]
+                        maze = create_maze(level_data["width"], level_data["height"], level_data["seed"])
+                        new_w = level_data["width"]  * TILE + PADDING * 2
+                        new_h = level_data["height"] * TILE + HUD_HEIGHT + PADDING * 2
+                        window = center_window(native_window, new_w, new_h)
+                        current_state = GameState.PLAYING
                     elif point_in_box(px, py, help_x, help_y, help_image.get_width(), help_image.get_height()):
                         current_state = GameState.HELP
-                        print("help clicked")
                     elif point_in_box(px, py, score_x, score_y, highscore_image.get_width(), highscore_image.get_height()):
                         current_state = GameState.HIGH_SCORES
-                        print("highscore clicked")
                     elif point_in_box(px, py, exit_x, exit_y, exit_image.get_width(), exit_image.get_height()):
                         running = False
                 elif current_state == GameState.HIGH_SCORES:
@@ -97,14 +124,18 @@ def run() -> None:
             window.blit(highscore_image, (score_x, score_y))
             window.blit(help_image,      (help_x,  help_y))
             window.blit(exit_image,      (exit_x,  exit_y))
-        # elif current_state == GameState.PLAYING:
-        #     window.fill(BACKGROUND_COLOR)
+
+        elif current_state == GameState.PLAYING:
+            window.fill(BACKGROUND_COLOR)
+            draw_maze(window, maze, TILE)
+
         elif current_state == GameState.HIGH_SCORES:
             window.blit(scores_background, (0, 0))
             window.blit(scores_header, (centered_x(scores_header), 20))
             scores = highscore.high_scores()
             menus.draw_high_scores(window,font,scores)
             window.blit(back_image, (back_x,back_y))
+
         elif current_state == GameState.HELP:
             window.fill(BACKGROUND_COLOR)
             menus.draw_help(window, help_font)
