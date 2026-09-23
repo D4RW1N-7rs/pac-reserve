@@ -9,6 +9,7 @@ import pygame
 import time
 from enum import Enum, auto
 from .ui import menus
+from .systems import highscore
 
 class GameState(Enum):
     MENU = auto()
@@ -23,19 +24,7 @@ FPS = 60
 BACKGROUND_COLOR = (0, 0, 0) #black
 
 def point_in_box(px: int, py: int, x: int, y: int, w: int, h: int) -> bool:
-    """Check whether a point falls inside a rectangular box.
-
-    Args:
-        px: X coordinate of the point to test.
-        py: Y coordinate of the point to test.
-        x: X coordinate of the box's top-left corner.
-        y: Y coordinate of the box's top-left corner.
-        w: Box width.
-        h: Box height.
-
-    Returns:
-        True if the point lies within the box, False otherwise.
-    """
+    """Check whether a point falls inside a rectangular box."""
     return x <= px <= x + w and y <= py <= y + h
 
 def centered_x(image: pygame.Surface) -> int:
@@ -48,12 +37,17 @@ def run() -> None:
     pygame.display.set_caption("PAC-MAN")
 
     assets = menus.load_assets()
+    font = assets["font"]
+    help_font = assets["help_font"]
     header_image    = assets["header"]
+    scores_header = assets["scores_header"]
+    scores_background = assets["scores_background"]
     background_image = assets["background"]
     play_image      = assets["play"]
     highscore_image = assets["highscores"]
     help_image      = assets["help"]
     exit_image      = assets["exit"]
+    back_image= assets["back"]
 
     play_x = centered_x(play_image)
     play_y = 275
@@ -63,6 +57,8 @@ def run() -> None:
     help_y = 395
     exit_x = centered_x(exit_image)
     exit_y = 455
+    back_x = centered_x(back_image)
+    back_y = 520
 
     current_state = GameState.MENU
 
@@ -75,17 +71,24 @@ def run() -> None:
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 px, py = event.pos
-                if point_in_box(px, py, play_x, play_y, play_image.get_width(), play_image.get_height()):
-                    current_state = GameState.PLAYING
-                    print("play clicked")
-                elif point_in_box(px, py, help_x, help_y, help_image.get_width(), help_image.get_height()):
-                    current_state = GameState.HELP
-                    print("help clicked")
-                elif point_in_box(px, py, score_x, score_y, highscore_image.get_width(), highscore_image.get_height()):
-                    current_state = GameState.HIGH_SCORES
-                    print("highscore clicked")
-                elif point_in_box(px, py, exit_x, exit_y, exit_image.get_width(), exit_image.get_height()):
-                    running = False
+                if current_state == GameState.MENU:
+                    if point_in_box(px, py, play_x, play_y, play_image.get_width(), play_image.get_height()):
+                        # current_state = GameState.PLAYING
+                        print("play clicked")
+                    elif point_in_box(px, py, help_x, help_y, help_image.get_width(), help_image.get_height()):
+                        current_state = GameState.HELP
+                        print("help clicked")
+                    elif point_in_box(px, py, score_x, score_y, highscore_image.get_width(), highscore_image.get_height()):
+                        current_state = GameState.HIGH_SCORES
+                        print("highscore clicked")
+                    elif point_in_box(px, py, exit_x, exit_y, exit_image.get_width(), exit_image.get_height()):
+                        running = False
+                elif current_state == GameState.HIGH_SCORES:
+                    if point_in_box(px, py, back_x, back_y, back_image.get_width(), back_image.get_height()):
+                        current_state = GameState.MENU
+                elif current_state == GameState.HELP:
+                    if point_in_box(px, py, back_x, back_y, back_image.get_width(), back_image.get_height()):
+                        current_state = GameState.MENU
 
         if current_state == GameState.MENU:
             window.blit(background_image, (0, 0))
@@ -96,10 +99,16 @@ def run() -> None:
             window.blit(exit_image,      (exit_x,  exit_y))
         # elif current_state == GameState.PLAYING:
         #     window.fill(BACKGROUND_COLOR)
-        # elif current_state == GameState.HIGH_SCORES:
-        #     window.fill(BACKGROUND_COLOR)
-        # elif current_state == GameState.HELP:
-        #     window.fill(BACKGROUND_COLOR)
+        elif current_state == GameState.HIGH_SCORES:
+            window.blit(scores_background, (0, 0))
+            window.blit(scores_header, (centered_x(scores_header), 20))
+            scores = highscore.high_scores()
+            menus.draw_high_scores(window,font,scores)
+            window.blit(back_image, (back_x,back_y))
+        elif current_state == GameState.HELP:
+            window.fill(BACKGROUND_COLOR)
+            menus.draw_help(window, help_font)
+            window.blit(back_image, (back_x,back_y))
 
         pygame.display.flip()
 
