@@ -1,0 +1,30 @@
+{
+  "highscore_filename": "highscore.txt",
+  "levels": [
+    {
+      "level": 1,
+      "seed": 42,
+      "width": 15,
+      "height": 15
+    },
+    {
+      "level": 2,
+      "seed": 13,
+      "width": 23,
+      "height": 23
+    },
+    {
+      "level": 3,
+      "seed": 37,
+      "width": 30,
+      "height": 30
+    }
+  ],
+  "lives": 3,
+  "pacgum": 42,
+  "points_per_pacgum": 10,
+  "points_per_super_pacgum": 50,
+  "points_per_ghost": 200,
+  "seed": 42,
+  "level_max_time": 90
+}

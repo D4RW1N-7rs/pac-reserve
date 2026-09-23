@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+.venv/
+
+# Linting / type-checking / testing
+.mypy_cache/
+.pytest_cache/
