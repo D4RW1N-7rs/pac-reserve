@@ -14,6 +14,7 @@ from .ui import menus
 from .systems import highscore
 from .systems.maze_integration import create_maze
 from .systems.config_loader import load_config
+from .ui.hud import draw_hud
 
 
 class GameState(Enum):
@@ -28,6 +29,14 @@ WINDOW_HEIGHT = 600
 FPS = 60
 BACKGROUND_COLOR = (0, 0, 0)
 
+def create_window(width: int, height: int) -> pygame.Surface:
+    """Open a brand-new window of the given size, centered on screen."""
+    pygame.display.quit()
+    pygame.display.init()
+    window = pygame.display.set_mode((width, height))
+    pygame.display.set_caption("PAC-MAN")
+    return window
+
 def point_in_box(px: int, py: int, x: int, y: int, w: int, h: int) -> bool:
     """Check whether a point falls inside a rectangular box."""
     return x <= px <= x + w and y <= py <= y + h
@@ -35,10 +44,6 @@ def point_in_box(px: int, py: int, x: int, y: int, w: int, h: int) -> bool:
 def centered_x(image: pygame.Surface) -> int:
     """Calculate the X coordinate to center an image on the screen."""
     return (WINDOW_WIDTH - image.get_width()) // 2
-
-def create_window(width: int, height: int) -> pygame.Surface:
-    """Create or resize the game window."""
-    return pygame.display.set_mode((width, height))
 
 def run() -> None:
     pygame.init()
@@ -79,7 +84,7 @@ def run() -> None:
 
     score = 0 #get_score()  # Placeholder for actual score retrieval logic
     lives = config["lives"]
-    current_level = 1
+    current_level = 10
     level_data = config["levels"][current_level - 1]
     maze = None 
 
@@ -124,10 +129,7 @@ def run() -> None:
         elif current_state == GameState.PLAYING:
             window.fill(BACKGROUND_COLOR)
             draw_maze(window, maze, TILE)
-            level_text = font.render(f"Level: {current_level}", True, (255, 255, 255))
-            score_text = font.render(f"Score: {score}", True, (255, 255, 255))
-            window.blit(score_text, (10, 40))
-            window.blit(level_text, (10, 10))
+            draw_hud(window, font, current_level, score, lives, pac_head_image)
 
         elif current_state == GameState.HIGH_SCORES:
             window.blit(scores_background, (0, 0))
