@@ -22,7 +22,8 @@ def load_assets() -> dict[str, pygame.Surface | pygame.font.Font]:
         "highscores": load_button("img/buttons/highscores.png"),
         "help":       load_button("img/buttons/help.png"),
         "exit":       load_button("img/buttons/exit.png"),
-        "back":       load_button("img/buttons/back.png")
+        "back":       load_button("img/buttons/back.png"),
+        "pac-head":   load_button("img/pac/R/2.png"),
     }
 
 def draw_high_scores(

@@ -15,6 +15,7 @@ from .systems import highscore
 from .systems.maze_integration import create_maze
 from .systems.config_loader import load_config
 
+
 class GameState(Enum):
     MENU = auto()
     PLAYING = auto()
@@ -56,6 +57,7 @@ def run() -> None:
     help_image      = assets["help"]
     exit_image      = assets["exit"]
     back_image= assets["back"]
+    pac_head_image= assets["pac-head"]
 
     play_x = centered_x(play_image)
     play_y = 275
@@ -74,6 +76,9 @@ def run() -> None:
     HUD_HEIGHT = 60
     PADDING = 16
     config = load_config("config.json")
+
+    score = 0 #get_score()  # Placeholder for actual score retrieval logic
+    lives = config["lives"]
     current_level = 1
     level_data = config["levels"][current_level - 1]
     maze = None 
@@ -119,6 +124,10 @@ def run() -> None:
         elif current_state == GameState.PLAYING:
             window.fill(BACKGROUND_COLOR)
             draw_maze(window, maze, TILE)
+            level_text = font.render(f"Level: {current_level}", True, (255, 255, 255))
+            score_text = font.render(f"Score: {score}", True, (255, 255, 255))
+            window.blit(score_text, (10, 40))
+            window.blit(level_text, (10, 10))
 
         elif current_state == GameState.HIGH_SCORES:
             window.blit(scores_background, (0, 0))
