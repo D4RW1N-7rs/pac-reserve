@@ -35,22 +35,13 @@ def centered_x(image: pygame.Surface) -> int:
     """Calculate the X coordinate to center an image on the screen."""
     return (WINDOW_WIDTH - image.get_width()) // 2
 
-def center_window(native_window: pygame.window.Window, width: int, height: int) -> pygame.Surface:
-    """Resize the native window and place its center at the desktop center."""
-    native_window.size = (width, height)
-    window_width, window_height = native_window.size
-    screen_width, screen_height = pygame.display.get_desktop_sizes()[0]
-    native_window.position = (
-        (screen_width - window_width) // 2,
-        (screen_height - window_height) // 2,
-    )
-    return native_window.get_surface()
+def create_window(width: int, height: int) -> pygame.Surface:
+    """Create or resize the game window."""
+    return pygame.display.set_mode((width, height))
 
 def run() -> None:
     pygame.init()
-    window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    native_window = pygame.window.Window.from_display_module()
-    window = center_window(native_window, WINDOW_WIDTH, WINDOW_HEIGHT)
+    window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT)
     pygame.display.set_caption("PAC-MAN")
 
     assets = menus.load_assets()
@@ -79,11 +70,11 @@ def run() -> None:
 
     current_state = GameState.MENU
 
-    TILE = 32
+    TILE = 35
     HUD_HEIGHT = 60
     PADDING = 16
     config = load_config("config.json")
-    current_level = 3
+    current_level = 1
     level_data = config["levels"][current_level - 1]
     maze = None 
 
@@ -102,7 +93,7 @@ def run() -> None:
                         maze = create_maze(level_data["width"], level_data["height"], level_data["seed"])
                         new_w = level_data["width"]  * TILE + PADDING * 2
                         new_h = level_data["height"] * TILE + HUD_HEIGHT + PADDING * 2
-                        window = center_window(native_window, new_w, new_h)
+                        window = create_window(new_w, new_h)
                         current_state = GameState.PLAYING
                     elif point_in_box(px, py, help_x, help_y, help_image.get_width(), help_image.get_height()):
                         current_state = GameState.HELP

@@ -33,8 +33,16 @@ def load_config(filename: str) -> dict:
 
     try:
         with open(filename, "r") as f:
-            lines = [line for line in f if not line.strip().startswith("#")]
-            raw = json.loads("".join(lines))
+            content = f.read()
+
+        if not content.strip():
+            print(f"Warning: Config file '{filename}' is empty. "
+                  "Using default configuration.")
+            return default_config
+
+        lines = [line for line in content.splitlines()
+                 if not line.strip().startswith("#")]
+        raw = json.loads("\n".join(lines))
             
         if not isinstance(raw, dict):
             print(f"Warning: Invalid format in {filename}. "

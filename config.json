@@ -10,14 +10,56 @@
     {
       "level": 2,
       "seed": 13,
-      "width": 23,
-      "height": 23
+      "width": 20,
+      "height": 18
     },
     {
       "level": 3,
       "seed": 37,
+      "width": 25,
+      "height": 22
+    },
+    {
+      "level": 4,
+      "seed": 37,
+      "width": 30,
+      "height": 26
+    },
+    {
+      "level": 5,
+      "seed": 37,
       "width": 35,
-      "height": 25
+      "height": 26
+    },
+    {
+      "level": 6,
+      "seed": 42,
+      "width": 40,
+      "height": 26
+    },
+    {
+      "level": 7,
+      "seed": 13,
+      "width": 44,
+      "height": 26
+    },
+    {
+      "level": 8,
+      "seed": 37,
+      "width": 47,
+      "height": 26
+    },
+    {
+      "level": 9,
+      "seed": 37,
+      "width": 50,
+      "height": 26
+    },
+    {
+      "level": 10,
+      "seed": 37,
+      "width": 53,
+      "height": 26
     }
   ],
   "lives": 3,

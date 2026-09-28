@@ -5,6 +5,26 @@ the expected record format, sort or limit scores according to game rules, and
 handle a missing first-run file. It should keep persistence details separate
 from gameplay and the on-screen score display.
 """
+
+h = [
+	{
+		"name": "Player1",
+		"score": 1500
+	},
+	{
+		"name": "Player2",
+		"score": 1200
+	},
+	{
+		"name": "Player3",
+		"score": 900
+	},
+	{
+		"name": "Player4",
+		"score": 800
+	}
+]
+
 def high_scores() -> list[dict[str, str | int]]:
     """Return the current high-score entries.
 
@@ -13,7 +33,7 @@ def high_scores() -> list[dict[str, str | int]]:
         Currently a stub — returns an empty list until real
         persistence is implemented.
     """
-    return []
+    return h
 
 
 

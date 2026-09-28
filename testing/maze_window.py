@@ -15,7 +15,7 @@ SIZE = (30, 30)
 SEED = 42
 CELL_SIZE = 30  # pixels per cell
 WALL_COLOR = (0, 0, 255)  # Blue walls
-BG_COLOR = (0, 0, 0)      # Black background
+BG_COLOR = (225, 245, 255)  # Very light blue background
 SPECIAL_COLOR = (50, 50, 50)  # Gray for the special "42" cells
 PADDING = 20  # Padding around the maze in pixels
 # ──────────────────────────────────────────────────────────────────────────
@@ -145,7 +145,7 @@ def main():
     clock = pygame.time.Clock()
     
     # Create Ghosts
-    colors = ["cyan", "orange", "pink", "red"]
+    colors = ["cyan", "orange", "pink", "Ared"]
     ghosts = []
     
     # Define the 4 corners for the ghosts to spawn

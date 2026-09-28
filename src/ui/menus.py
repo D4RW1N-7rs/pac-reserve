@@ -5,6 +5,7 @@ views as needed. It should convert user selections into clear commands or
 state changes while leaving the actual game transitions to the game or engine.
 """
 import pygame
+from .renderer import draw_rect
 
 def load_button(filename: str) -> pygame.Surface:
     return pygame.image.load(filename)
@@ -16,7 +17,7 @@ def load_assets() -> dict[str, pygame.Surface | pygame.font.Font]:
         "header":     pygame.image.load("img/Pac-Man.png"),
         "scores_header":     pygame.image.load("img/highscores_title.png"),
         "background": pygame.image.load("img/background.png"),
-        "scores_background": pygame.image.load("img/scores_background.jpg"),
+        "scores_background": pygame.image.load("img/scores_background.png"),
         "play":       load_button("img/buttons/play.png"),
         "highscores": load_button("img/buttons/highscores.png"),
         "help":       load_button("img/buttons/help.png"),
@@ -43,7 +44,7 @@ def draw_high_scores(
             window.blit(dots,(300,y))
             window.blit(dots,(500,y))
         if i < 9:
-            pygame.draw.rect(window, (255, 213, 0), (180, y + 30, 400, 1))
+            draw_rect(window, 180, y + 30, 400, 1, (255, 213, 0))
 
 def draw_help(window: pygame.Surface, font: pygame.font.Font) -> None:
     lines = [

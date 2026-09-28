@@ -11,6 +11,7 @@ class GhostUI(pygame.sprite.Sprite):
         # Load images for all 4 directions
         self.images = {
             "U": self.load_image("U"),
+            "angry_red": self.load_image("angry_red"),
             "D": self.load_image("D"),
             "L": self.load_image("L"),
             "R": self.load_image("R")
@@ -21,9 +22,9 @@ class GhostUI(pygame.sprite.Sprite):
         
     def load_image(self, direction):
         """Loads the ghost image for a given direction."""
-        path = os.path.join("img", "ghosts", direction, f"{self.color}-{direction}.png")
         project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-        path = os.path.join(project_root, "img", "ghosts", direction, f"{self.color}-{direction}.png")
+        folder = "angry_red" if self.color == "Ared" and direction in {"U", "D", "L", "R"} else direction
+        path = os.path.join(project_root, "img", "ghosts", folder, f"{self.color}-{direction}.png")
         if os.path.exists(path):
             image = pygame.image.load(path).convert_alpha()
             return pygame.transform.scale(image, (self.size, self.size))
