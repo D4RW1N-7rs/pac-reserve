@@ -86,6 +86,7 @@ def run() -> None:
     lives = config["lives"]
     current_level = 1
     level_data = config["levels"][current_level - 1]
+    timer = level_data.get("level_max_time")
     maze = None 
 
     running = True
@@ -129,7 +130,7 @@ def run() -> None:
         elif current_state == GameState.PLAYING:
             window.fill(BACKGROUND_COLOR)
             draw_maze(window, maze, TILE)
-            draw_hud(window, font, current_level, score, lives, pac_head_image)
+            draw_hud(window, font, current_level, score, lives, pac_head_image,timer)
 
         elif current_state == GameState.HIGH_SCORES:
             window.blit(scores_background, (0, 0))

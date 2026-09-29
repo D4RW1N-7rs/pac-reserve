@@ -15,18 +15,17 @@ class LevelConfig(BaseModel):
     seed: int = Field(default=42, gt=0)
     width: int = Field(default=15, gt=0)
     height: int = Field(default=15, gt=0)
+    level_max_time: int = Field(default=90, gt=0)
 
 class GameConfig(BaseModel):
     model_config = ConfigDict(extra="ignore")
-    highscore_filename: str = Field(default="highscores.json", min_length=1)
-    levels: list[LevelConfig] = Field(default=[LevelConfig()], min_length=1)
+    highscore_filename: str = Field(default="data/highscore.json", min_length=1)
+    levels: list[LevelConfig] = Field(default_factory=lambda: [LevelConfig()], min_length=1)
     lives: int = Field(default=3, gt=0)
     pacgum: int = Field(default=42, gt=0)
     points_per_pacgum: int = Field(default=10, ge=0)
     points_per_super_pacgum: int = Field(default=50, ge=0)
     points_per_ghost: int = Field(default=200, ge=0)
-    seed: int = Field(default=42, gt=0)
-    level_max_time: int = Field(default=90, gt=0)
 
 def load_config(filename: str) -> dict:
     default_config = GameConfig().model_dump()
@@ -67,11 +66,12 @@ def load_config(filename: str) -> dict:
         
     return default_config
 
-def validate_config(config_file: dict) -> bool:
-    config = load_config(config_file)
-    filename_parts = config["highscore_filename"].split(".")
+def validate_config(config_file: str | dict) -> bool:
+    config = load_config(config_file) if isinstance(config_file, str) else config_file
+    filename = config.get("highscore_filename", "")
+    filename_parts = filename.split(".")
     if len(filename_parts) != 2 or filename_parts[-1] not in ("txt", "json"):
-        print(f"High score file must have exactly one .txt or .json extension: {config['highscore_filename']}")
-        exit(1)
-    return config
+        print(f"High score file must have exactly one .txt or .json extension: {filename}")
+        raise SystemExit(1)
+    return True
 
