@@ -84,7 +84,7 @@ def run() -> None:
 
     score = 0 #get_score()  # Placeholder for actual score retrieval logic
     lives = config["lives"]
-    current_level = 10
+    current_level = 1
     level_data = config["levels"][current_level - 1]
     maze = None 
 
