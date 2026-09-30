@@ -9,13 +9,13 @@ import pygame
 import time
 from enum import Enum, auto
 
-from .ui.renderer import draw_maze, draw_rect
 from .ui import menus
+from .ui.hud import draw_hud
+from .ui.renderer import draw_maze, draw_rect
 from .systems import highscore
 from .systems.maze_integration import create_maze
 from .systems.config_loader import load_config
-from .ui.hud import draw_hud
-
+from .entities.player import Player
 
 class GameState(Enum):
     MENU = auto()
@@ -52,6 +52,26 @@ def centered_x(image: pygame.Surface, window_width: int) -> int:
 def centered_y(image: pygame.Surface, window_height: int) -> int:
     """Calculate the Y coordinate to center an image on the screen."""
     return (window_height - image.get_height()) // 2
+
+
+def find_middle_spawn(maze):
+    """Return the nearest valid cell to the maze center for Pac-Man."""
+    height = len(maze)
+    width = len(maze[0]) if height else 0
+    center_x = width // 2
+    center_y = height // 2
+    start_x, start_y = center_x, center_y
+
+    if maze[center_y][center_x] == 15:
+        for radius in range(1, max(width, height)):
+            for dx in range(-radius, radius + 1):
+                for dy in range(-radius, radius + 1):
+                    nx = center_x + dx
+                    ny = center_y + dy
+                    if 0 <= nx < width and 0 <= ny < height and maze[ny][nx] != 15:
+                        return nx, ny
+    return start_x, start_y
+
 
 def run() -> None:
     config = load_config(CONFIG_FILE)
@@ -128,6 +148,8 @@ def run() -> None:
                         new_w = level_data["width"]  * TILE + PADDING * 2
                         new_h = level_data["height"] * TILE + HUD_HEIGHT + PADDING * 2
                         window = create_window(new_w, new_h)
+                        start_x, start_y = find_middle_spawn(maze)
+                        pacman = Player(start_x, start_y, TILE)
                         level_start_time = time.time()
                         current_state = GameState.PLAYING
                     elif point_in_box(px, py, help_x, help_y, help_image.get_width(), help_image.get_height()):
@@ -151,11 +173,10 @@ def run() -> None:
                         elif player_name in existing_names:
                             error_message = "NAME ALREADY EXISTS!"
                         else:
-                            # Everything is correct! Save the score.
                             highscore.save_highscore(HIGHSCORE_FILE, player_name, score)
                             window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT)
                             current_state = GameState.MENU
-                            error_message = ""  # Reset it for the next game
+                            error_message = ""
 
             if current_state == GameState.GAME_OVER:
                 if event.type == pygame.KEYDOWN:
@@ -169,14 +190,16 @@ def run() -> None:
                         elif player_name in existing_names:
                             error_message = "NAME ALREADY EXISTS!"
                         else:
-                            # Everything is correct! Save the score.
                             highscore.save_highscore(HIGHSCORE_FILE, player_name, score)
                             window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT)
                             current_state = GameState.MENU
-                            error_message = ""  # Reset it for the next game
+                            error_message = ""
                     else:
                         if len(player_name) <= 10 and (event.unicode.isalnum() or event.unicode == " "):
                             player_name += event.unicode
+
+            if current_state == GameState.PLAYING:
+                pacman.handle_input(event)
 
 
         if current_state == GameState.MENU:
@@ -197,16 +220,15 @@ def run() -> None:
                 level = font.render(f"level: {current_level}", True, (212, 149, 1))
                 window.blit(level, (centered_x(level, new_w), centered_y(level, new_h)))
                 
-                # Calculate 3, 2, 1 based on how much time has passed
                 seconds_left = 3 - int(time_since_start)
                 count_down = font.render(f"{seconds_left}", True, (212, 149, 1))
                 window.blit(count_down, (centered_x(count_down, new_w), centered_y(count_down, new_h + 100)))
-                
-                # Keep resetting the game timer so they don't lose time during the countdown
+
                 last_second_tick = now 
                 
             else:
                 # --- COUNTDOWN FINISHED, PLAY THE GAME! ---
+                pacman.update(maze, TILE)
                 if now - last_second_tick >= 1.0:
                     level_time_remaining = max(0, level_time_remaining - 1)
                     last_second_tick = now
@@ -215,10 +237,12 @@ def run() -> None:
                 window.fill(BACKGROUND_COLOR)
                 draw_maze(window, maze, TILE)
                 draw_hud(window, font, current_level, score, lives, pac_head_image, timer)
+                pacman.draw(window, PADDING, HUD_HEIGHT, TILE)
                 
                 if timer <= 0:
                     current_state = GameState.GAME_OVER
-                    player_name = "" # Clear name for the new game!
+                    player_name = ""
+            
 
         elif current_state == GameState.HIGH_SCORES:
             window.blit(scores_background, (0, 0))
