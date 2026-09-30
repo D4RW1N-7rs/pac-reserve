@@ -9,7 +9,7 @@ import pygame
 import time
 from enum import Enum, auto
 
-from .ui.renderer import draw_maze
+from .ui.renderer import draw_maze, draw_rect
 from .ui import menus
 from .systems import highscore
 from .systems.maze_integration import create_maze
@@ -22,12 +22,16 @@ class GameState(Enum):
     PLAYING = auto()
     HIGH_SCORES = auto()
     HELP = auto()
+    PAUSED = auto()
+    GAME_OVER = auto()
 
 
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
 FPS = 60
 BACKGROUND_COLOR = (0, 0, 0)
+CONFIG_FILE = "config.json"
+HIGHSCORE_FILE = "data/highscores.json"
 
 def create_window(width: int, height: int) -> pygame.Surface:
     """Open a brand-new window of the given size, centered on screen."""
@@ -41,11 +45,21 @@ def point_in_box(px: int, py: int, x: int, y: int, w: int, h: int) -> bool:
     """Check whether a point falls inside a rectangular box."""
     return x <= px <= x + w and y <= py <= y + h
 
-def centered_x(image: pygame.Surface) -> int:
+def centered_x(image: pygame.Surface, window_width: int) -> int:
     """Calculate the X coordinate to center an image on the screen."""
-    return (WINDOW_WIDTH - image.get_width()) // 2
+    return (window_width - image.get_width()) // 2
+
+def centered_y(image: pygame.Surface, window_height: int) -> int:
+    """Calculate the Y coordinate to center an image on the screen."""
+    return (window_height - image.get_height()) // 2
 
 def run() -> None:
+    config = load_config(CONFIG_FILE)
+    highscores = highscore.load_config(HIGHSCORE_FILE)
+
+    if not config or not highscores:
+        return
+    
     pygame.init()
     window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT)
     pygame.display.set_caption("PAC-MAN")
@@ -63,31 +77,38 @@ def run() -> None:
     exit_image      = assets["exit"]
     back_image= assets["back"]
     pac_head_image= assets["pac-head"]
+    gameover_image= assets["gameover"]
+    save_image= assets["save"]
 
-    play_x = centered_x(play_image)
+    play_x = centered_x(play_image, WINDOW_WIDTH)
     play_y = 275
-    score_x = centered_x(highscore_image)
+    score_x = centered_x(highscore_image, WINDOW_WIDTH)
     score_y = 335
-    help_x = centered_x(help_image)
+    help_x = centered_x(help_image, WINDOW_WIDTH)
     help_y = 395
-    exit_x = centered_x(exit_image)
+    exit_x = centered_x(exit_image, WINDOW_WIDTH)
     exit_y = 455
-    back_x = centered_x(back_image)
+    back_x = centered_x(back_image, WINDOW_WIDTH)
     back_y = 520
+
 
     current_state = GameState.MENU
 
     TILE = 35
     HUD_HEIGHT = 60
     PADDING = 16
-    config = load_config("config.json")
+
 
     score = 0 #get_score()  # Placeholder for actual score retrieval logic
     lives = config["lives"]
     current_level = 1
     level_data = config["levels"][current_level - 1]
-    timer = level_data.get("level_max_time")
-    maze = None 
+    timer = int(level_data.get("level_max_time", 0))
+    maze = None
+    level_time_remaining = timer
+    last_second_tick = time.time()
+    error_message = ""
+    player_name = ""
 
     running = True
     while running:
@@ -101,10 +122,13 @@ def run() -> None:
                 if current_state == GameState.MENU:
                     if point_in_box(px, py, play_x, play_y, play_image.get_width(), play_image.get_height()):
                         level_data = config["levels"][current_level - 1]
+                        level_time_remaining = int(level_data["level_max_time"])
+                        last_second_tick = time.time()
                         maze = create_maze(level_data["width"], level_data["height"], level_data["seed"])
                         new_w = level_data["width"]  * TILE + PADDING * 2
                         new_h = level_data["height"] * TILE + HUD_HEIGHT + PADDING * 2
                         window = create_window(new_w, new_h)
+                        level_start_time = time.time()
                         current_state = GameState.PLAYING
                     elif point_in_box(px, py, help_x, help_y, help_image.get_width(), help_image.get_height()):
                         current_state = GameState.HELP
@@ -118,6 +142,42 @@ def run() -> None:
                 elif current_state == GameState.HELP:
                     if point_in_box(px, py, back_x, back_y, back_image.get_width(), back_image.get_height()):
                         current_state = GameState.MENU
+                elif current_state == GameState.GAME_OVER:
+                    if point_in_box(px, py, save_x, save_y, save_image.get_width(), save_image.get_height()):
+                        existing_names = [dic["name"] for dic in highscores]
+                        
+                        if len(player_name) < 2:
+                            error_message = "NAME MUST BE AT LEAST 2 LETTERS!"
+                        elif player_name in existing_names:
+                            error_message = "NAME ALREADY EXISTS!"
+                        else:
+                            # Everything is correct! Save the score.
+                            highscore.save_highscore(HIGHSCORE_FILE, player_name, score)
+                            window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT)
+                            current_state = GameState.MENU
+                            error_message = ""  # Reset it for the next game
+
+            if current_state == GameState.GAME_OVER:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_BACKSPACE:
+                        player_name = player_name[:-1]
+                    elif event.key == pygame.K_RETURN:
+                        existing_names = [dic["name"] for dic in highscores]
+
+                        if len(player_name) < 2:
+                            error_message = "NAME MUST BE AT LEAST 2 LETTERS!"
+                        elif player_name in existing_names:
+                            error_message = "NAME ALREADY EXISTS!"
+                        else:
+                            # Everything is correct! Save the score.
+                            highscore.save_highscore(HIGHSCORE_FILE, player_name, score)
+                            window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT)
+                            current_state = GameState.MENU
+                            error_message = ""  # Reset it for the next game
+                    else:
+                        if len(player_name) <= 10 and (event.unicode.isalnum() or event.unicode == " "):
+                            player_name += event.unicode
+
 
         if current_state == GameState.MENU:
             window.blit(background_image, (0, 0))
@@ -128,21 +188,70 @@ def run() -> None:
             window.blit(exit_image,      (exit_x,  exit_y))
 
         elif current_state == GameState.PLAYING:
-            window.fill(BACKGROUND_COLOR)
-            draw_maze(window, maze, TILE)
-            draw_hud(window, font, current_level, score, lives, pac_head_image,timer)
+            now = time.time()
+            time_since_start = now - level_start_time
+
+            if time_since_start < 3.0:
+                # --- WE ARE STILL COUNTING DOWN ---
+                window.fill(BACKGROUND_COLOR)
+                level = font.render(f"level: {current_level}", True, (212, 149, 1))
+                window.blit(level, (centered_x(level, new_w), centered_y(level, new_h)))
+                
+                # Calculate 3, 2, 1 based on how much time has passed
+                seconds_left = 3 - int(time_since_start)
+                count_down = font.render(f"{seconds_left}", True, (212, 149, 1))
+                window.blit(count_down, (centered_x(count_down, new_w), centered_y(count_down, new_h + 100)))
+                
+                # Keep resetting the game timer so they don't lose time during the countdown
+                last_second_tick = now 
+                
+            else:
+                # --- COUNTDOWN FINISHED, PLAY THE GAME! ---
+                if now - last_second_tick >= 1.0:
+                    level_time_remaining = max(0, level_time_remaining - 1)
+                    last_second_tick = now
+                    
+                timer = level_time_remaining
+                window.fill(BACKGROUND_COLOR)
+                draw_maze(window, maze, TILE)
+                draw_hud(window, font, current_level, score, lives, pac_head_image, timer)
+                
+                if timer <= 0:
+                    current_state = GameState.GAME_OVER
+                    player_name = "" # Clear name for the new game!
 
         elif current_state == GameState.HIGH_SCORES:
             window.blit(scores_background, (0, 0))
-            window.blit(scores_header, (centered_x(scores_header), 20))
-            scores = highscore.high_scores()
-            menus.draw_high_scores(window,font,scores)
+            window.blit(scores_header, (centered_x(scores_header, WINDOW_WIDTH), 20))
+            highscores = highscore.load_config(HIGHSCORE_FILE)
+            menus.draw_high_scores(window,font,highscores)
             window.blit(back_image, (back_x,back_y))
 
         elif current_state == GameState.HELP:
             window.fill(BACKGROUND_COLOR)
             menus.draw_help(window, help_font)
             window.blit(back_image, (back_x,back_y))
+
+        elif current_state == GameState.GAME_OVER:
+            save_x = centered_x(save_image, new_w)
+            save_y = centered_y(save_image, new_h + 400)
+            window.fill((212, 149, 1))
+            window.blit(gameover_image, (centered_x(gameover_image, new_w), centered_y(gameover_image, new_h)))
+            window.blit(save_image, (save_x, save_y))
+            enter_name = font.render("Enter your name", True, (0, 0, 0))
+            window.blit(enter_name, (centered_x(enter_name, new_w), centered_y(enter_name, new_h + 120)))
+
+            rect_w = 300
+            rect_h = 50
+            rect_x = (new_w - rect_w) // 2
+            rect_y = (new_h + 220 - rect_h) // 2
+            draw_rect(window, rect_x, rect_y, rect_w, rect_h, (0, 0, 0))
+
+            text_surface = font.render(player_name, True, (255, 255, 255))
+            window.blit(text_surface, (centered_x(text_surface, new_w), centered_y(text_surface, new_h + 220)))
+            if error_message != "":
+                name_error = font.render(error_message, True, (255, 0, 0))
+                window.blit(name_error, (centered_x(name_error, new_w), centered_y(name_error, new_h + 300)))
 
         pygame.display.flip()
 

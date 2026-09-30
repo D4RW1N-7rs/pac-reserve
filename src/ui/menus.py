@@ -18,12 +18,14 @@ def load_assets() -> dict[str, pygame.Surface | pygame.font.Font]:
         "scores_header":     pygame.image.load("img/highscores_title.png"),
         "background": pygame.image.load("img/background.png"),
         "scores_background": pygame.image.load("img/scores_background.png"),
+        "gameover":    pygame.image.load("img/gameover.png"),
         "play":       load_button("img/buttons/play.png"),
         "highscores": load_button("img/buttons/highscores.png"),
         "help":       load_button("img/buttons/help.png"),
         "exit":       load_button("img/buttons/exit.png"),
         "back":       load_button("img/buttons/back.png"),
-        "pac-head":   load_button("img/pac/R/2.png"),
+        "save":       load_button("img/buttons/save.png"),
+        "pac-head":   load_button("img/pac/R/2.png")
     }
 
 def draw_high_scores(

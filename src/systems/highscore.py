@@ -6,38 +6,63 @@ handle a missing first-run file. It should keep persistence details separate
 from gameplay and the on-screen score display.
 """
 
-h = [
-	{
-		"name": "Player1",
-		"score": 1500
-	},
-	{
-		"name": "Player2",
-		"score": 1200
-	},
-	{
-		"name": "Player3",
-		"score": 900
-	},
-	{
-		"name": "Player4",
-		"score": 800
-	}
-]
+import json
+import os
+from pydantic import BaseModel, ConfigDict, ValidationError, Field
 
-def high_scores() -> list[dict[str, str | int]]:
-    """Return the current high-score entries.
+class Highscore(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    name: str = Field(min_length=2, max_length=10)
+    score: int = Field(ge=0)
 
-    Returns:
-        A list of score records, each with a "name" and "score" key.
-        Currently a stub — returns an empty list until real
-        persistence is implemented.
-    """
-    return h
+def load_config(filename: str) -> list[Highscore]:
+
+    try:
+        with open(filename, "r") as f:
+            content = f.read()
+
+        lines = [line for line in content.splitlines()
+                 if not line.strip().startswith("#")]
+        raw = json.loads("\n".join(lines))
+            
+        if not isinstance(raw, list):
+            print(f"Warning: Invalid format in {filename}. ")
+            return []
+        
+        return [Highscore(**item).model_dump() for item in raw]
+
+    except FileNotFoundError:
+        print(f"Warning: highscore file '{filename}' not found.")
+        return []
+    except json.JSONDecodeError:
+        print(f"Warning: Invalid JSON syntax in '{filename}'. ")
+        return []
+    except ValidationError as e:
+        print("Invalid highscore schema:")
+        for err in e.errors(include_url=False):
+            loc = ".".join(str(loc) for loc in err["loc"])
+            print(f"  - {loc}: {err['msg']}")
+        return []
+    except PermissionError:
+        print(f"Permission denied when accessing {filename}")
+        return []
 
 
+def save_highscore(filename: str, player: str, score: int) -> None:
+    if not os.path.exists(filename):
+        print(f"Warning: highscore file '{filename}' not found.")
+        return
 
+    try:
+        scores = load_config(filename)
+        if scores is None:
+            scores = []
 
+        scores.append({"name": player, "score": score})
+        sorted_scores = sorted(scores, key=lambda x: x["score"], reverse=True)[:10]
 
+        with open(filename, "w") as f:
+            json.dump(sorted_scores, f, indent=4)
 
-
+    except PermissionError:
+        print(f"Permission denied when accessing {filename}")

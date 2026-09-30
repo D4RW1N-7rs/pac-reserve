@@ -8,18 +8,24 @@ draw them consistently without calculating collisions, movement, or scores.
 HUD_COLOR = (255, 255, 255)
 LIFE_ICON_GAP = 8
 
-def draw_hud(window, font, level, score,lives, pac_image,timer):
-    """Draw the HUD with score, lives, and Pac-Man image."""
+
+def draw_hud(window, font, level, score, lives, pac_image, timer):
+    """Draw the HUD with score, lives, and a countdown timer."""
     score_text = font.render(f"Score: {score}", True, HUD_COLOR)
-    lives_text = font.render(f"Lives: ", True, HUD_COLOR)
+    lives_text = font.render("Lives: ", True, HUD_COLOR)
     level_text = font.render(f"Level: {level}", True, HUD_COLOR)
+    time_text = font.render("Time:", True, HUD_COLOR)
+    timer_text = font.render(f"{max(0, int(timer))}", True, HUD_COLOR
+                             if timer > 10 else (255, 0, 0))  # red if less than 10 seconds
 
     x = window.get_width() // 2
-    
-    window.blit(level_text, (10, 10))    
+
+    window.blit(level_text, (10, 10))
     window.blit(score_text, (10, 40))
     window.blit(lives_text, (x, 10))
-    
+    window.blit(time_text, (x, 40))
+    window.blit(timer_text, (x + 70, 40))
+
     for i in range(lives):
         pac_x = x + i * (pac_image.get_width() + 10)
         pac_y = 10
