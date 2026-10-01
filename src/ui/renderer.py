@@ -38,11 +38,4 @@ def draw_maze(window, maze, tile):
             if cell & R:  # right wall exists
                 draw_rect(window, px + tile - WALL_THICK, py, WALL_THICK, tile, WALL_COLOR)
 
-def valid_gum_cells(maze, tile):
-    """Return a list of valid grid cells for gum collectibles."""
-    cells = []
-    for y in range(len(maze)):
-        for x in range(len(maze[0])):
-            if maze[y][x] != 15:
-                cells.append((x, y))
-    return cells
+

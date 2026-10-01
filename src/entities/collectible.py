@@ -18,3 +18,11 @@ class Collectible:
         self.points = points
         self.visible = True
 
+    def valid_gum_cells(self,maze):
+        """Return a list of valid grid cells for gum collectibles."""
+        cells = []
+        for y in range(len(maze)):
+            for x in range(len(maze[0])):
+                if maze[y][x] != 15:
+                    cells.append((x, y))
+        return cells
