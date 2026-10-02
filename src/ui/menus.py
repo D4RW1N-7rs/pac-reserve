@@ -7,25 +7,30 @@ state changes while leaving the actual game transitions to the game or engine.
 import pygame
 from .renderer import draw_rect
 
-def load_button(filename: str) -> pygame.Surface:
+def load_image(filename: str) -> pygame.Surface:
     return pygame.image.load(filename)
 
 def load_assets() -> dict[str, pygame.Surface | pygame.font.Font]:
     return {
         "font":       pygame.font.Font(None, 32),
         "help_font":       pygame.font.Font(None, 22),
-        "header":     pygame.image.load("img/Pac-Man.png"),
-        "scores_header":     pygame.image.load("img/highscores_title.png"),
-        "background": pygame.image.load("img/background.png"),
-        "scores_background": pygame.image.load("img/scores_background.png"),
-        "gameover":    pygame.image.load("img/gameover.png"),
-        "play":       load_button("img/buttons/play.png"),
-        "highscores": load_button("img/buttons/highscores.png"),
-        "help":       load_button("img/buttons/help.png"),
-        "exit":       load_button("img/buttons/exit.png"),
-        "back":       load_button("img/buttons/back.png"),
-        "save":       load_button("img/buttons/save.png"),
-        "pac-head":   load_button("img/pac/R/2.png")
+        "header":     load_image("img/Pac-Man.png"),
+        "scores_header":     load_image("img/highscores_title.png"),
+        "background": load_image("img/background.png"),
+        "scores_background": load_image("img/scores_background.png"),
+        "gameover":    load_image("img/gameover.png"),
+        "play":       load_image("img/buttons/play.png"),
+        "highscores": load_image("img/buttons/highscores.png"),
+        "help":       load_image("img/buttons/help.png"),
+        "exit":       load_image("img/buttons/exit.png"),
+        "back":       load_image("img/buttons/back.png"),
+        "save":       load_image("img/buttons/save.png"),
+        "continue": load_image("img/buttons/continue.png"),
+        "menu": load_image("img/buttons/menu.png"),
+        "pause": load_image("img/pause.png"),
+        "small_pac": load_image("img/pac/smallpac.png"),
+        "pacgum": load_image("img/pacgum.png"),
+        "super-pacgum": load_image("img/super-pacgum.png")
     }
 
 def draw_high_scores(
@@ -53,7 +58,7 @@ def draw_help(window: pygame.Surface, font: pygame.font.Font) -> None:
     lines = [
     ("CONTROLS",          (255, 200, 0)),
     ("Arrow Keys / WASD : Move", (255, 255, 255)),
-    ("P: Pause",           (255, 255, 255)),
+    ("P / Esc: Pause",           (255, 255, 255)),
     ("OBJECTIVE",         (255, 200, 0)),
     ("Eat all dots to complete the level",  (255, 255, 255)),
     ("Avoid ghosts — you lose a life on contact",  (255, 255, 255)),

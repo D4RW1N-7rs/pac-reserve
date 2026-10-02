@@ -11,11 +11,12 @@ from enum import Enum, auto
 
 from .ui import menus
 from .ui.hud import draw_hud
-from .ui.renderer import draw_maze, draw_rect
+from .ui.renderer import draw_maze, draw_rect, draw_collectibles
 from .systems import highscore
 from .systems.maze_integration import create_maze
 from .systems.config_loader import load_config
 from .entities.player import Player
+from .entities.collectible import Collectible
 
 class GameState(Enum):
     MENU = auto()
@@ -28,7 +29,7 @@ class GameState(Enum):
 
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
-FPS = 60
+FPS = 48
 BACKGROUND_COLOR = (0, 0, 0)
 CONFIG_FILE = "config.json"
 HIGHSCORE_FILE = "data/highscores.json"
@@ -75,9 +76,9 @@ def find_middle_spawn(maze):
 
 def run() -> None:
     config = load_config(CONFIG_FILE)
-    highscores = highscore.load_config(HIGHSCORE_FILE)
+    highscores = highscore.load_scores(HIGHSCORE_FILE)
 
-    if not config or not highscores:
+    if not config or highscores is None:
         return
     
     pygame.init()
@@ -96,9 +97,15 @@ def run() -> None:
     help_image      = assets["help"]
     exit_image      = assets["exit"]
     back_image= assets["back"]
-    pac_head_image= assets["pac-head"]
     gameover_image= assets["gameover"]
     save_image= assets["save"]
+    continue_image = assets["continue"]
+    menu_image = assets["menu"]
+    pause = assets["pause"]
+    smallpac = assets["small_pac"]
+    pacgum = assets["pacgum"]
+    super_pacgum = assets["super-pacgum"]
+
 
     play_x = centered_x(play_image, WINDOW_WIDTH)
     play_y = 275
@@ -112,9 +119,10 @@ def run() -> None:
     back_y = 520
 
 
+
     current_state = GameState.MENU
 
-    TILE = 35
+    TILE = 40
     HUD_HEIGHT = 60
     PADDING = 16
 
@@ -150,6 +158,14 @@ def run() -> None:
                         window = create_window(new_w, new_h)
                         start_x, start_y = find_middle_spawn(maze)
                         pacman = Player(start_x, start_y, TILE)
+                        gums, super_gums = Collectible.generate_gums(
+                            maze,
+                            level_data["width"],
+                            level_data["height"],
+                            config["pacgum"],
+                            config["points_per_pacgum"],
+                            config["points_per_super_pacgum"]
+                        )
                         level_start_time = time.time()
                         current_state = GameState.PLAYING
                     elif point_in_box(px, py, help_x, help_y, help_image.get_width(), help_image.get_height()):
@@ -177,6 +193,12 @@ def run() -> None:
                             window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT)
                             current_state = GameState.MENU
                             error_message = ""
+                elif current_state == GameState.PAUSED:
+                    if point_in_box(px, py, continue_x, continue_y, continue_image.get_width(), continue_image.get_height()):
+                        current_state = GameState.PLAYING
+                    if point_in_box(px, py, menu_x, menu_y, menu_image.get_width(), menu_image.get_height()):
+                        window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT)
+                        current_state = GameState.MENU
 
             if current_state == GameState.GAME_OVER:
                 if event.type == pygame.KEYDOWN:
@@ -195,11 +217,22 @@ def run() -> None:
                             current_state = GameState.MENU
                             error_message = ""
                     else:
-                        if len(player_name) <= 10 and (event.unicode.isalnum() or event.unicode == " "):
+                        if len(player_name) < 10 and (event.unicode.isalnum() or event.unicode == " "):
                             player_name += event.unicode
 
-            if current_state == GameState.PLAYING:
+            elif current_state == GameState.PLAYING:
                 pacman.handle_input(event)
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE or event.key == pygame.K_p:
+                        window = create_window(new_w, new_h)
+                        current_state = GameState.PAUSED
+
+            elif current_state == GameState.PAUSED:
+                pacman.handle_input(event)
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE or event.key == pygame.K_p:
+                        window = create_window(new_w, new_h)
+                        current_state = GameState.PLAYING
 
 
         if current_state == GameState.MENU:
@@ -236,7 +269,8 @@ def run() -> None:
                 timer = level_time_remaining
                 window.fill(BACKGROUND_COLOR)
                 draw_maze(window, maze, TILE)
-                draw_hud(window, font, current_level, score, lives, pac_head_image, timer)
+                draw_collectibles(window, gums, super_gums, pacgum, super_pacgum, TILE, PADDING, HUD_HEIGHT)
+                draw_hud(window, font, current_level, score, lives, smallpac, timer)
                 pacman.draw(window, PADDING, HUD_HEIGHT, TILE)
                 
                 if timer <= 0:
@@ -247,7 +281,7 @@ def run() -> None:
         elif current_state == GameState.HIGH_SCORES:
             window.blit(scores_background, (0, 0))
             window.blit(scores_header, (centered_x(scores_header, WINDOW_WIDTH), 20))
-            highscores = highscore.load_config(HIGHSCORE_FILE)
+            highscores = highscore.load_scores(HIGHSCORE_FILE)
             menus.draw_high_scores(window,font,highscores)
             window.blit(back_image, (back_x,back_y))
 
@@ -276,6 +310,18 @@ def run() -> None:
             if error_message != "":
                 name_error = font.render(error_message, True, (255, 0, 0))
                 window.blit(name_error, (centered_x(name_error, new_w), centered_y(name_error, new_h + 300)))
+        
+        elif current_state == GameState.PAUSED:
+            continue_x = centered_x(continue_image, new_w)
+            continue_y = centered_y(continue_image, new_h)
+            menu_x = centered_x(menu_image, new_w)
+            menu_y = centered_y(menu_image, new_h) + 80
+            window.fill((212, 149, 1))
+            window.blit(pause,(centered_x(pause, new_w), -100))
+            window.blit(continue_image, (continue_x, continue_y) )
+            window.blit(menu_image, (menu_x, menu_y) )
+
+            
 
         pygame.display.flip()
 
@@ -287,3 +333,4 @@ def run() -> None:
     pygame.quit()
 
 
+ 

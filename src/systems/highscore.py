@@ -15,7 +15,7 @@ class Highscore(BaseModel):
     name: str = Field(min_length=2, max_length=10)
     score: int = Field(ge=0)
 
-def load_config(filename: str) -> list[Highscore]:
+def load_scores(filename: str) -> list[Highscore]:
 
     try:
         with open(filename, "r") as f:
@@ -54,7 +54,7 @@ def save_highscore(filename: str, player: str, score: int) -> None:
         return
 
     try:
-        scores = load_config(filename)
+        scores = load_scores(filename)
         if scores is None:
             scores = []
 

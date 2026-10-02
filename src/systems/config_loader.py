@@ -42,12 +42,15 @@ def load_config(filename: str) -> dict:
         lines = [line for line in content.splitlines()
                  if not line.strip().startswith("#")]
         raw = json.loads("\n".join(lines))
-            
+        
         if not isinstance(raw, dict):
             print(f"Warning: Invalid format in {filename}. "
                   "Using default configuration.")
             return default_config
-        
+
+
+        validate_config(raw)
+
         return GameConfig(**raw).model_dump()
         
     except FileNotFoundError:
@@ -63,15 +66,15 @@ def load_config(filename: str) -> dict:
             print(f"  - {loc}: {err['msg']}")
     except PermissionError:
         print(f"Permission denied when accessing {filename}")
+   
         
     return default_config
 
-def validate_config(config_file: str | dict) -> bool:
+def validate_config(config_file: str | dict) -> None:
     config = load_config(config_file) if isinstance(config_file, str) else config_file
     filename = config.get("highscore_filename", "")
     filename_parts = filename.split(".")
     if len(filename_parts) != 2 or filename_parts[-1] not in ("txt", "json"):
         print(f"High score file must have exactly one .txt or .json extension: {filename}")
         raise SystemExit(1)
-    return True
 

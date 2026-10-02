@@ -18,12 +18,9 @@ class Player:
         self.current_direction = "STOP"
         self.next_direction = "STOP"
         self.last_direction = "RIGHT"
-        self.speed = 5 
+        self.speed = 5 #tile 40 speed : 1, 2, 4, 5, 8, 10, 20
         self.load_images()
         self.animation_tick = 0
-
-    def pac_animation(self, img, x , y):
-        self.window.blit((img),(x,y))
 
     def load_images(self):
         self.pac1_head = pygame.image.load("img/pac/1.png")
@@ -121,23 +118,23 @@ class Player:
 
         elif self.last_direction == "LEFT":
             if frame == 0: image_to_draw = self.pac1_head
-            elif frame == 1 : image_to_draw = self.pac2_L
-            elif frame == 2 : image_to_draw = self.pac1_L
-            elif frame == 3 : image_to_draw = self.pac2_L
+            elif frame == 1 : image_to_draw = self.pac1_L
+            elif frame == 2 : image_to_draw = self.pac2_L
+            elif frame == 3 : image_to_draw = self.pac1_L
             elif frame == 4 : image_to_draw = self.pac1_head
 
         elif self.last_direction == "UP":
             if frame == 0: image_to_draw = self.pac1_head
-            elif frame == 1 : image_to_draw = self.pac2_U
-            elif frame == 2 : image_to_draw = self.pac1_U
-            elif frame == 3 : image_to_draw = self.pac2_U
+            elif frame == 1 : image_to_draw = self.pac1_U
+            elif frame == 2 : image_to_draw = self.pac2_U
+            elif frame == 3 : image_to_draw = self.pac1_U
             elif frame == 4 : image_to_draw = self.pac1_head
 
         elif self.last_direction == "DOWN":
             if frame == 0: image_to_draw = self.pac1_head
-            elif frame == 1 : image_to_draw = self.pac2_D
-            elif frame == 2 : image_to_draw = self.pac1_D
-            elif frame == 3 : image_to_draw = self.pac2_D
+            elif frame == 1 : image_to_draw = self.pac1_D
+            elif frame == 2 : image_to_draw = self.pac2_D
+            elif frame == 3 : image_to_draw = self.pac1_D
             elif frame == 4 : image_to_draw = self.pac1_head
         
         window.blit(image_to_draw, (draw_x, draw_y))
