@@ -101,6 +101,35 @@ def eat_collectibles(pacman, gums, super_gums, TILE) -> int:
     return points
 
 
+def start_level(level_index, config, TILE, PADDING, HUD_HEIGHT):
+    level_data = config["levels"][level_index] if level_index < len(config["levels"]) else config["levels"][-1]
+    maze = create_maze(level_data["width"], level_data["height"], level_data["seed"])
+
+    new_w = level_data["width"] * TILE + PADDING * 2
+    new_h = level_data["height"] * TILE + HUD_HEIGHT + PADDING * 2
+
+    ghosts = [
+        Ghost(1, 1, TILE, "red"),
+        Ghost(level_data["width"] - 2, 1, TILE, "cyan"),
+        Ghost(1, level_data["height"] - 2, TILE, "orange"),
+        Ghost(level_data["width"] - 2, level_data["height"] - 2, TILE, "pink"),
+    ]
+
+    start_x, start_y = find_middle_spawn(maze)
+    pacman = Player(start_x, start_y, TILE)
+
+    gums, super_gums = Collectible.generate_gums(
+        maze,
+        level_data["width"],
+        level_data["height"],
+        config["pacgum"],
+        config["points_per_pacgum"],
+        config["points_per_super_pacgum"],
+    )
+
+    return maze, new_w, new_h, ghosts, pacman, gums, super_gums
+
+
 def run() -> None:
     config = load_config(CONFIG_FILE)
     highscores = highscore.load_scores(HIGHSCORE_FILE)
@@ -154,7 +183,7 @@ def run() -> None:
 
     score = 0 #get_score()  # Placeholder for actual score retrieval logic
     lives = config["lives"]
-    current_level = 1
+    current_level = 10
     level_data = config["levels"][current_level - 1]
     timer = int(level_data.get("level_max_time", 0))
     maze = None
@@ -174,29 +203,11 @@ def run() -> None:
                 px, py = event.pos
                 if current_state == GameState.MENU:
                     if point_in_box(px, py, play_x, play_y, play_image.get_width(), play_image.get_height()):
-                        level_data = config["levels"][current_level - 1]
+                        maze, new_w, new_h, ghosts, pacman, gums, super_gums = start_level(current_level - 1, config, TILE, PADDING, HUD_HEIGHT)
                         level_time_remaining = int(level_data["level_max_time"])
                         last_second_tick = time.time()
-                        maze = create_maze(level_data["width"], level_data["height"], level_data["seed"])
-                        new_w = level_data["width"]  * TILE + PADDING * 2
-                        new_h = level_data["height"] * TILE + HUD_HEIGHT + PADDING * 2
-
-                        ghost_red = Ghost(1, 1, TILE, "red")
-                        ghost_cyan = Ghost(level_data["width"] - 2, 1, TILE, "cyan")
-                        ghost_orange = Ghost(1, level_data["height"] - 2, TILE, "orange")
-                        ghost_pink = Ghost(level_data["width"] - 2,level_data["height"] - 2,TILE,"pink")
 
                         window = create_window(new_w, new_h)
-                        start_x, start_y = find_middle_spawn(maze)
-                        pacman = Player(start_x, start_y, TILE)
-                        gums, super_gums = Collectible.generate_gums(
-                            maze,
-                            level_data["width"],
-                            level_data["height"],
-                            config["pacgum"],
-                            config["points_per_pacgum"],
-                            config["points_per_super_pacgum"]
-                        )
                         level_start_time = time.time()
                         current_state = GameState.PLAYING
                     elif point_in_box(px, py, help_x, help_y, help_image.get_width(), help_image.get_height()):
@@ -277,7 +288,7 @@ def run() -> None:
             now = time.time() #10:0
             time_since_start = now - level_start_time
 
-            if time_since_start < 1.0:
+            if time_since_start < 3.0:
                 # --- WE ARE STILL COUNTING DOWN ---
                 window.fill(BACKGROUND_COLOR)
                 level = font.render(f"level: {current_level}", True, (212, 149, 1))
@@ -288,7 +299,6 @@ def run() -> None:
                 window.blit(count_down, (centered_x(count_down, new_w), centered_y(count_down, new_h + 100)))
 
                 last_second_tick = now 
-
             else:
                 # --- COUNTDOWN FINISHED, PLAY THE GAME! ---
                 pacman.update(maze, TILE)
@@ -308,18 +318,60 @@ def run() -> None:
                 draw_hud(window, font, current_level, score, lives, smallpac, timer)
                 pacman.draw(window, PADDING, HUD_HEIGHT, TILE)
 
+               
+                pac_x = pacman.pixel_x // TILE
+                pac_y = pacman.pixel_y // TILE
+                pacman_pos = (pac_x, pac_y)
+                super_positions = [
+                    (0, 0),
+                    (0, (new_h ) // TILE - 3),
+                    ((new_w ) // TILE -1, 0),
+                    ((new_w ) // TILE -1, (new_h) // TILE - 3),
+                ]
+                
+                # print("pacman pos:", pacman_pos)
+                # print("super positions:", super_positions)
+                
+                if pacman_pos in super_positions:
+                    for ghost in ghosts:
+                        ghost.state = "FRIGHTENED"
+
                 # oussama
-                ghost_red.draw(window, PADDING, HUD_HEIGHT, TILE)
-                ghost_red.update(maze, TILE)
+                for ghost in ghosts:
+                    ghost.draw(window, PADDING, HUD_HEIGHT, TILE)
+                    ghost.update(maze, TILE, pacman)
 
-                ghost_cyan.draw(window, PADDING, HUD_HEIGHT, TILE)
-                ghost_cyan.update(maze, TILE)
+                    if ghost.collide(pacman):
+                        lives -= 1
+                        time.sleep(1)
+                        ghosts = [
+                            Ghost(1, 1, TILE, "red"),
+                            Ghost(level_data["width"] - 2, 1, TILE, "cyan"),
+                            Ghost(1, level_data["height"] - 2, TILE, "orange"),
+                            Ghost(level_data["width"] - 2,level_data["height"] - 2,TILE,"pink")
+                        ]
 
-                ghost_orange.draw(window, PADDING, HUD_HEIGHT, TILE)
-                ghost_orange.update(maze, TILE)
+                        start_x, start_y = find_middle_spawn(maze)
+                        pacman = Player(start_x, start_y, TILE)
 
-                ghost_pink.draw(window, PADDING, HUD_HEIGHT, TILE)
-                ghost_pink.update(maze, TILE)
+                        if lives == 0:
+                            current_state = GameState.GAME_OVER
+                            time.sleep(1)
+
+                if not any(gum.visible for gum in gums) and not any(sgum.visible for sgum in super_gums):
+                    current_level += 1
+                    maze, new_w, new_h, ghosts, pacman, gums, super_gums = start_level(
+                        current_level - 1, config, TILE, PADDING, HUD_HEIGHT
+                    )
+                    window = create_window(new_w, new_h)
+                    level_time_remaining = int(level_data["level_max_time"])
+                    level_start_time = time.time()
+
+                if current_level > len(config["levels"]):
+                    window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT)
+                    current_state = GameState.MENU
+                    player_name = ""
+
                 ##33
                 if timer <= 0:
                     current_state = GameState.GAME_OVER

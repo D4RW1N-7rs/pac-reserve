@@ -18,7 +18,7 @@ class Player:
         self.current_direction = "STOP"
         self.next_direction = "STOP"
         self.last_direction = "RIGHT"
-        self.speed = 5 #tile 40 speed : 1, 2, 4, 5, 8, 10, 20
+        self.speed = 5 # tile 40 speed : 1, 2, 4, 5, 8, 10, 20
         self.load_images()
         self.animation_tick = 0
 
@@ -81,7 +81,8 @@ class Player:
                 
             if is_blocked:
                 self.current_direction = "STOP"
-
+        
+        #moves 
         if self.current_direction == "UP":
             self.pixel_y -= self.speed
         elif self.current_direction == "DOWN":

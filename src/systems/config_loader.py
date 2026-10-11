@@ -22,7 +22,7 @@ class GameConfig(BaseModel):
     highscore_filename: str = Field(default="data/highscore.json", min_length=1)
     levels: list[LevelConfig] = Field(default_factory=lambda: [LevelConfig()], min_length=1)
     lives: int = Field(default=3, gt=0)
-    pacgum: int = Field(default=42, gt=0)
+    pacgum: int = Field(default=420, gt=0)
     points_per_pacgum: int = Field(default=10, ge=0)
     points_per_super_pacgum: int = Field(default=50, ge=0)
     points_per_ghost: int = Field(default=200, ge=0)
@@ -77,4 +77,3 @@ def validate_config(config_file: str | dict) -> None:
     if len(filename_parts) != 2 or filename_parts[-1] not in ("txt", "json"):
         print(f"High score file must have exactly one .txt or .json extension: {filename}")
         raise SystemExit(1)
-

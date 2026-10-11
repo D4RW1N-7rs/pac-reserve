@@ -60,20 +60,20 @@
     {
       "level": 9,
       "seed": 9,
-      "width": 50,
-      "height": 26,
+      "width": 15,
+      "height": 15,
       "level_max_time": 300
     },
     {
       "level": 10,
       "seed": 40,
-      "width": 53,
-      "height": 26,
+      "width": 20,
+      "height": 20,
       "level_max_time": 330
     }
   ],
   "lives": 3,
-  "pacgum": 420,
+  "pacgum": 1,
   "points_per_pacgum": 10,
   "points_per_super_pacgum": 50,
   "points_per_ghost": 200

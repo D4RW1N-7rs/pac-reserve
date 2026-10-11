@@ -31,10 +31,10 @@ class Collectible:
 
     @staticmethod
     def generate_gums(maze, width, height, pacgum_count, points_per_pacgum, points_per_super_pacgum):
-        
+
         # Step 1: Get all walkable cells
         valid_cells = Collectible.valid_gum_cells(maze)
-        
+
         # Step 2: Define the 4 super gum corner positions
         super_positions = [
             (0, 0),
@@ -48,7 +48,7 @@ class Collectible:
         for pos in super_positions:
             if pos in valid_cells:
                 valid_cells.remove(pos)
-        
+
         # Step 4: Pick regular gum positions
         # TODO: if pacgum_count >= len(valid_cells), use all valid_cells
         # TODO: else, use random.sample(valid_cells, pacgum_count) to pick randomly
@@ -64,7 +64,7 @@ class Collectible:
         for pos in chosen_positions:
             gum = Collectible(pos[0], pos[1], CollectibleType.PACGUM, points_per_pacgum)
             gums.append(gum)
-        
+
         # TODO: Create super gum collectibles for each super position
         for pos in super_positions:
             if maze[pos[1]][pos[0]] != 15:
