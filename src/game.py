@@ -141,6 +141,10 @@ class PacmanGame:
         self.player_name = ""
         self.eaten_points_popup = None  # (surface, (x, y), end_time)
 
+        # Cheats
+        self.invincible = False
+        self.ghosts_frozen = False
+
     def start_level(self, level_index: int) -> None:
         """Initialize maze, entities, and window size for the given level."""
         levels = self.config["levels"]
@@ -281,11 +285,37 @@ class PacmanGame:
             if event.key in (pygame.K_ESCAPE, pygame.K_p):
                 self.window = create_window(self.new_w, self.new_h)
                 self.current_state = GameState.PAUSED
+            else:
+                self.apply_cheat(event.key)
 
         elif self.current_state == GameState.PAUSED:
             if event.key in (pygame.K_ESCAPE, pygame.K_p):
                 self.window = create_window(self.new_w, self.new_h)
                 self.current_state = GameState.PLAYING
+
+    def apply_cheat(self, key: int) -> None:
+        """Apply cheat codes: 1=invincibility, 2=skip level, 3=freeze ghosts, 4=extra lives, 5=fast speed."""
+        if key in (pygame.K_1, pygame.K_KP1):
+            self.invincible = not self.invincible
+            print(f"[CHEAT] Invincibility: {'ON' if self.invincible else 'OFF'}")
+        elif key in (pygame.K_2, pygame.K_KP2):
+            print("[CHEAT] Level skip!")
+            for gum in self.gums:
+                gum.visible = False
+            for sgum in self.super_gums:
+                sgum.visible = False
+        elif key in (pygame.K_3, pygame.K_KP3):
+            self.ghosts_frozen = not self.ghosts_frozen
+            print(f"[CHEAT] Ghost freeze: {'ON' if self.ghosts_frozen else 'OFF'}")
+        elif key in (pygame.K_4, pygame.K_KP4):
+            self.lives += 1
+            print(f"[CHEAT] Extra life! Lives: {self.lives}")
+        elif key in (pygame.K_5, pygame.K_KP5):
+            self.pacman.speed = 8 if self.pacman.speed == 5 else 5
+            # Snap to nearest tile boundary to re-align with grid modulo checks
+            self.pacman.pixel_x = round(self.pacman.pixel_x / TILE) * TILE
+            self.pacman.pixel_y = round(self.pacman.pixel_y / TILE) * TILE
+            print(f"[CHEAT] Player speed: {self.pacman.speed}")
 
     # ==========================
     # UPDATE / LOGIC
@@ -321,7 +351,8 @@ class PacmanGame:
 
         # Update ghosts & check collision
         for ghost in self.ghosts:
-            ghost.update(self.maze, TILE, self.pacman)
+            if not self.ghosts_frozen:
+                ghost.update(self.maze, TILE, self.pacman)
 
             if ghost.collide(self.pacman):
                 if ghost.state == "FRIGHTENED":
@@ -334,7 +365,7 @@ class PacmanGame:
                         ghost.pixel_y + HUD_HEIGHT + PADDING,
                     )
                     self.eaten_points_popup = (popup_surf, popup_pos, time.time() + 1.0)
-                else:
+                elif not self.invincible:
                     self.lives -= 1
                     if self.lives <= 0:
                         self.current_state = GameState.GAME_OVER
