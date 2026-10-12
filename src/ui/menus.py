@@ -30,7 +30,8 @@ def load_assets() -> dict[str, pygame.Surface | pygame.font.Font]:
         "pause": load_image("img/pause.png"),
         "small_pac": load_image("img/pac/smallpac.png"),
         "pacgum": load_image("img/pacgum.png"),
-        "super-pacgum": load_image("img/super-pacgum.png")
+        "super-pacgum": load_image("img/super-pacgum.png"),
+        "winner": load_image("img/win.png")
     }
 
 def draw_high_scores(

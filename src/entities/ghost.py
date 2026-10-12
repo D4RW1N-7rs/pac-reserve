@@ -14,6 +14,8 @@ import time
 
 U, D, R, L = 1, 4, 2, 8
 
+FRIGHTENED_DURATION = 7.0  # seconds ghosts stay frightened
+
 class Ghost():
     def __init__(self, start_grid_x, start_grid_y, tile_size, color):
 
@@ -29,7 +31,7 @@ class Ghost():
         self.load_images()
 
     def load_images(self):
-
+        """Load ghost images for each direction based on color."""
         self.images = {
             "LEFT": pygame.image.load(f"img/ghosts/L/{self.color}-L.png"),
             "RIGHT": pygame.image.load(f"img/ghosts/R/{self.color}-R.png"),
@@ -37,11 +39,30 @@ class Ghost():
             "DOWN": pygame.image.load(f"img/ghosts/D/{self.color}-D.png")
         }
 
+    def frighten(self):
+        """Switch to FRIGHTENED state and start the timer."""
+        self.state = "FRIGHTENED"
+        self.frightened_timer = time.time()
+        self.speed = 2
+
+    def reset(self, tile_size):
+        """Reset ghost back to its initial spawn position and normal state."""
+        self.pixel_x = self.start_x * tile_size
+        self.pixel_y = self.start_y * tile_size
+        self.state = "CHASE"
+        self.speed = 4
+        self.direction = "LEFT"
+
     def draw(self, window, padding, hud_height, tile_size):
+        """Draw the ghost on the game window based on its current state and direction."""
+        if self.state == "EATEN":
+            return
+
         image = self.images[self.direction]
         if self.state == "FRIGHTENED":
             image = pygame.image.load("img/ghosts/dead-ghost.png")
-            self.speed = 2
+            if time.time() - self.frightened_timer >= FRIGHTENED_DURATION / 2:
+                image = pygame.image.load("img/ghosts/dead-ghost-2.png")
 
         offset_x = (tile_size - image.get_width()) // 2
         offset_y = (tile_size - image.get_height()) // 2
@@ -52,6 +73,9 @@ class Ghost():
         window.blit(image, (draw_x, draw_y))
 
     def bfs(self, maze: list[list[int]], start: tuple[int, int], target: tuple[int, int]) -> str | None:
+        """Perform BFS to find the shortest path from start to target in the maze.
+        Returns the first direction to take from the start position towards the target.
+        If no path exists, returns None."""
         directions = [
             ("UP", 0, -1, U),
             ("DOWN", 0, 1, D),
@@ -110,8 +134,23 @@ class Ghost():
 
 
     def update(self, maze, tile_size, pacman):
+        """Update the ghost's position and state."""
+        # Check if frightened timer has expired → go back to CHASE
+        if (self.state == "FRIGHTENED" or self.state == "EATEN") and time.time() - self.frightened_timer >= FRIGHTENED_DURATION:
+            if self.state == "EATEN":
+                self.reset(tile_size)
+            else:
+                self.state = "CHASE"
+                self.speed = 4
+                # Snap to nearest tile so the ghost re-aligns to the grid.
+                self.pixel_x = round(self.pixel_x / tile_size) * tile_size
+                self.pixel_y = round(self.pixel_y / tile_size) * tile_size
+
+        if self.state == "EATEN":
+            return
 
         if self.pixel_x % tile_size == 0 and self.pixel_y % tile_size == 0:
+
 
             ghost_x = self.pixel_x // tile_size # to know coordinate(x) the ghost 
             ghost_y = self.pixel_y // tile_size # to know coordinate(y) the ghost
@@ -143,10 +182,18 @@ class Ghost():
                 bfs_move = self.bfs(maze, (ghost_x, ghost_y), (goal_x, goal_y))
 
             elif self.state == "FRIGHTENED":
-                bfs_move = self.bfs(maze, (pacman.pixel_x // tile_size, pacman.pixel_y // tile_size), (ghost_x, ghost_y))            
+                move_deltas = {"UP": (0, -1), "DOWN": (0, 1), "LEFT": (-1, 0), "RIGHT": (1, 0)}
+                pac_x = pacman.pixel_x // tile_size
+                pac_y = pacman.pixel_y // tile_size
+                bfs_move = max(
+                    legal_moves,
+                    key=lambda d: (ghost_x + move_deltas[d][0] - pac_x) ** 2
+                                + (ghost_y + move_deltas[d][1] - pac_y) ** 2
+                )
 
             if bfs_move in legal_moves:
                 self.direction = bfs_move
+                
             elif self.direction not in legal_moves:
                 self.direction = random.choice(legal_moves)
 
@@ -220,14 +267,17 @@ class Ghost():
         return target_x, target_y
 
     def collide(self,pacman):
+        if self.state == "EATEN":
+            return False
+
         gx = self.pixel_x
         gy = self.pixel_y
 
         px = pacman.pixel_x
         py = pacman.pixel_y
 
-        thresholdX = 8
-        thresholdY = 8
+        thresholdX = 12
+        thresholdY = 12
 
         dx = abs(gx - px)
         dy = abs(gy - py)

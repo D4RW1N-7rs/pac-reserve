@@ -13,8 +13,8 @@ class LevelConfig(BaseModel):
     model_config = ConfigDict(extra="ignore")
     level: int = Field(default=1, gt=0)
     seed: int = Field(default=42, gt=0)
-    width: int = Field(default=15, gt=0)
-    height: int = Field(default=15, gt=0)
+    width: int = Field(default=15, gt=0, lt = 48)
+    height: int = Field(default=15, gt=0, lt = 24)
     level_max_time: int = Field(default=60, ge=0)
 
 class GameConfig(BaseModel):
@@ -22,7 +22,7 @@ class GameConfig(BaseModel):
     highscore_filename: str = Field(default="data/highscore.json", min_length=1)
     levels: list[LevelConfig] = Field(default_factory=lambda: [LevelConfig()], min_length=1)
     lives: int = Field(default=3, gt=0)
-    pacgum: int = Field(default=420, gt=0)
+    pacgum: int = Field(default=420, ge=0)
     points_per_pacgum: int = Field(default=10, ge=0)
     points_per_super_pacgum: int = Field(default=50, ge=0)
     points_per_ghost: int = Field(default=200, ge=0)

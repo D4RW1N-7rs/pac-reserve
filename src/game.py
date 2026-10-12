@@ -13,7 +13,6 @@ from enum import Enum, auto
 from .ui import menus
 from .ui.hud import draw_hud
 from .ui.renderer import draw_maze, draw_rect, draw_collectibles
-from .ui.renderer import draw_maze, draw_rect, draw_collectibles
 from .systems import highscore
 from .systems.maze_integration import create_maze
 from .systems.config_loader import load_config
@@ -31,6 +30,7 @@ class GameState(Enum):
     HELP = auto()
     PAUSED = auto()
     GAME_OVER = auto()
+    WINNER = auto()
 
 
 WINDOW_WIDTH = 800
@@ -79,12 +79,13 @@ def find_middle_spawn(maze):
                         return nx, ny
     return start_x, start_y
 
-def eat_collectibles(pacman, gums, super_gums, TILE) -> int:
+def eat_collectibles(pacman, gums, super_gums, TILE):
     """Check if Pac-Man has eaten any collectibles and update the score."""
     cell_x = (pacman.pixel_x + TILE // 2) // TILE
     cell_y = (pacman.pixel_y + TILE // 2) // TILE
 
     points = 0
+    super_eaten = False
 
     # this part for the for pac-gums:
     for gum in gums:
@@ -97,8 +98,9 @@ def eat_collectibles(pacman, gums, super_gums, TILE) -> int:
         if s_gum.visible and s_gum.x == cell_x and s_gum.y == cell_y:
             s_gum.visible = False
             points += s_gum.points
+            super_eaten = True
 
-    return points
+    return points, super_eaten
 
 
 def start_level(level_index, config, TILE, PADDING, HUD_HEIGHT):
@@ -161,6 +163,7 @@ def run() -> None:
     smallpac = assets["small_pac"]
     pacgum = assets["pacgum"]
     super_pacgum = assets["super-pacgum"]
+    winner = assets["winner"]
 
     TILE = 40
     HUD_HEIGHT = 60
@@ -183,7 +186,7 @@ def run() -> None:
 
     score = 0 #get_score()  # Placeholder for actual score retrieval logic
     lives = config["lives"]
-    current_level = 10
+    current_level = 1
     level_data = config["levels"][current_level - 1]
     timer = int(level_data.get("level_max_time", 0))
     maze = None
@@ -235,6 +238,19 @@ def run() -> None:
                             window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT)
                             current_state = GameState.MENU
                             error_message = ""
+                elif current_state == GameState.WINNER:
+                    if point_in_box(px, py, save_x, save_y, save_image.get_width(), save_image.get_height()):
+                        existing_names = [dic["name"] for dic in highscores]
+
+                        if len(player_name) < 2:
+                            error_message = "NAME MUST BE AT LEAST 2 LETTERS!"
+                        elif player_name in existing_names:
+                            error_message = "NAME ALREADY EXISTS!"
+                        else:
+                            highscore.save_highscore(HIGHSCORE_FILE, player_name, score)
+                            window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT)
+                            current_state = GameState.MENU
+                            error_message = ""
                 elif current_state == GameState.PAUSED:
                     if point_in_box(px, py, continue_x, continue_y, continue_image.get_width(), continue_image.get_height()):
                         current_state = GameState.PLAYING
@@ -243,6 +259,26 @@ def run() -> None:
                         current_state = GameState.MENU
 
             if current_state == GameState.GAME_OVER:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_BACKSPACE:
+                        player_name = player_name[:-1]
+                    elif event.key == pygame.K_RETURN:
+                        existing_names = [dic["name"] for dic in highscores]
+
+                        if len(player_name) < 2:
+                            error_message = "NAME MUST BE AT LEAST 2 LETTERS!"
+                        elif player_name in existing_names:
+                            error_message = "NAME ALREADY EXISTS!"
+                        else:
+                            highscore.save_highscore(HIGHSCORE_FILE, player_name, score)
+                            window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT)
+                            current_state = GameState.MENU
+                            error_message = ""
+                    else:
+                        if len(player_name) < 10 and (event.unicode.isalnum() or event.unicode == " "):
+                            player_name += event.unicode
+
+            if current_state == GameState.WINNER:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_BACKSPACE:
                         player_name = player_name[:-1]
@@ -304,8 +340,12 @@ def run() -> None:
                 pacman.update(maze, TILE)
 
                 ## oussama issfoula ##
-                points_won = eat_collectibles(pacman, gums, super_gums, TILE)
+                points_won, super_eaten = eat_collectibles(pacman, gums, super_gums, TILE)
                 score = score + points_won
+
+                if super_eaten:
+                    for ghost in ghosts:
+                        ghost.frighten()
 
                 if now - last_second_tick >= 1.0:
                     level_time_remaining = max(0, level_time_remaining - 1)
@@ -318,45 +358,33 @@ def run() -> None:
                 draw_hud(window, font, current_level, score, lives, smallpac, timer)
                 pacman.draw(window, PADDING, HUD_HEIGHT, TILE)
 
-               
-                pac_x = pacman.pixel_x // TILE
-                pac_y = pacman.pixel_y // TILE
-                pacman_pos = (pac_x, pac_y)
-                super_positions = [
-                    (0, 0),
-                    (0, (new_h ) // TILE - 3),
-                    ((new_w ) // TILE -1, 0),
-                    ((new_w ) // TILE -1, (new_h) // TILE - 3),
-                ]
-                
-                # print("pacman pos:", pacman_pos)
-                # print("super positions:", super_positions)
-                
-                if pacman_pos in super_positions:
-                    for ghost in ghosts:
-                        ghost.state = "FRIGHTENED"
-
                 # oussama
+
                 for ghost in ghosts:
                     ghost.draw(window, PADDING, HUD_HEIGHT, TILE)
                     ghost.update(maze, TILE, pacman)
 
                     if ghost.collide(pacman):
-                        lives -= 1
-                        time.sleep(1)
-                        ghosts = [
-                            Ghost(1, 1, TILE, "red"),
-                            Ghost(level_data["width"] - 2, 1, TILE, "cyan"),
-                            Ghost(1, level_data["height"] - 2, TILE, "orange"),
-                            Ghost(level_data["width"] - 2,level_data["height"] - 2,TILE,"pink")
-                        ]
-
-                        start_x, start_y = find_middle_spawn(maze)
-                        pacman = Player(start_x, start_y, TILE)
-
-                        if lives == 0:
-                            current_state = GameState.GAME_OVER
+                        if ghost.state == "FRIGHTENED":
+                            score += config.get("points_per_ghost", 200)
+                            ghost.state = "EATEN"
+                        else:
+                            lives -= 1
                             time.sleep(1)
+                            ghosts = [
+                                Ghost(1, 1, TILE, "red"),
+                                Ghost(level_data["width"] - 2, 1, TILE, "cyan"),
+                                Ghost(1, level_data["height"] - 2, TILE, "orange"),
+                                Ghost(level_data["width"] - 2, level_data["height"] - 2, TILE, "pink")
+                            ]
+
+                            start_x, start_y = find_middle_spawn(maze)
+                            pacman = Player(start_x, start_y, TILE)
+
+                            if lives == 0:
+                                current_state = GameState.GAME_OVER
+                                time.sleep(1)
+                                break
 
                 if not any(gum.visible for gum in gums) and not any(sgum.visible for sgum in super_gums):
                     current_level += 1
@@ -367,14 +395,13 @@ def run() -> None:
                     level_time_remaining = int(level_data["level_max_time"])
                     level_start_time = time.time()
 
-                if current_level > len(config["levels"]):
-                    window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT)
-                    current_state = GameState.MENU
-                    player_name = ""
-
                 ##33
                 if timer <= 0:
                     current_state = GameState.GAME_OVER
+                    player_name = ""
+
+                if current_level > len(config["levels"]):
+                    current_state = GameState.WINNER
                     player_name = ""
 
         elif current_state == GameState.HIGH_SCORES:
@@ -394,6 +421,27 @@ def run() -> None:
             save_y = centered_y(save_image, new_h + 400)
             window.fill((212, 149, 1))
             window.blit(gameover_image, (centered_x(gameover_image, new_w), centered_y(gameover_image, new_h)))
+            window.blit(save_image, (save_x, save_y))
+            enter_name = font.render("Enter your name", True, (0, 0, 0))
+            window.blit(enter_name, (centered_x(enter_name, new_w), centered_y(enter_name, new_h + 120)))
+
+            rect_w = 300
+            rect_h = 50
+            rect_x = (new_w - rect_w) // 2
+            rect_y = (new_h + 220 - rect_h) // 2
+            draw_rect(window, rect_x, rect_y, rect_w, rect_h, (0, 0, 0))
+
+            text_surface = font.render(player_name, True, (255, 255, 255))
+            window.blit(text_surface, (centered_x(text_surface, new_w), centered_y(text_surface, new_h + 220)))
+            if error_message != "":
+                name_error = font.render(error_message, True, (255, 0, 0))
+                window.blit(name_error, (centered_x(name_error, new_w), centered_y(name_error, new_h + 300)))
+        
+        elif current_state == GameState.WINNER:
+            save_x = centered_x(save_image, new_w)
+            save_y = centered_y(save_image, new_h + 400)
+            window.fill((212, 149, 1))
+            window.blit(winner, (centered_x(winner, new_w), centered_y(winner, new_h - 80)))
             window.blit(save_image, (save_x, save_y))
             enter_name = font.render("Enter your name", True, (0, 0, 0))
             window.blit(enter_name, (centered_x(enter_name, new_w), centered_y(enter_name, new_h + 120)))
