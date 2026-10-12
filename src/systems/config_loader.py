@@ -70,10 +70,11 @@ def load_config(filename: str) -> dict:
         
     return default_config
 
-def validate_config(config_file: str | dict) -> None:
+def validate_config(config_file: str | dict) -> bool:
     config = load_config(config_file) if isinstance(config_file, str) else config_file
     filename = config.get("highscore_filename", "")
     filename_parts = filename.split(".")
     if len(filename_parts) != 2 or filename_parts[-1] not in ("txt", "json"):
         print(f"High score file must have exactly one .txt or .json extension: {filename}")
         raise SystemExit(1)
+    return True

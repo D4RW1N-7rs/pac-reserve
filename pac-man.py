@@ -1,25 +1,40 @@
 """Start the Pac-Man application.
 
-This module is the command-line entry point for the project. It should parse
-any launch options, load the game configuration, construct the game object,
-and start the main loop. Keep orchestration here; game rules belong in
-``src/game.py`` and lower-level timing or input concerns belong in the engine.
+This module is the command-line entry point for the project. It loads configuration,
+constructs the Pac-Man game instance, and hands execution over to the engine run loop.
 """
-# import pygame
-# from src.engine import engine_loop
-# from src.systems import highscore
-# from src.systems.config_loader import load_config
+from src.systems.config_loader import load_config
+from src.systems import highscore
+from src.game import PacmanGame
+from src.engine import run_loop
+import argparse
+
+CONFIG_FILE = "config.json"
+HIGHSCORE_FILE = "data/highscores.json"
 
 
-# CONFIG_FILE = "config.json"
-# HIGHSCORE_FILE = "data/highscores.json"
+def parse_arguments() -> argparse.Namespace:
+    """Parse command-line arguments."""
+    arg_parser = argparse.ArgumentParser(description="Pac-Man Game.")
+    arg_parser.add_argument(
+        "config_file",
+        type=str,
+        default=CONFIG_FILE,
+        help="Path to the JSON configuration file.",
+    )
+    return arg_parser.parse_args()
 
-# config = load_config(CONFIG_FILE)
-# highscores = highscore.load_scores(HIGHSCORE_FILE)
 
-# engine_loop(config, highscores)
+def main() -> None:
+    args = parse_arguments()
+    config = load_config(args.config_file)
+    highscores = highscore.load_scores(HIGHSCORE_FILE)
+    if not config or highscores is None:
+        return
+
+    game = PacmanGame(config=config, highscores=highscores)
+    run_loop(game)
 
 
-from src.game import run
-
-run()
+if __name__ == "__main__":
+    main()

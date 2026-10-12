@@ -11,6 +11,8 @@ def load_image(filename: str) -> pygame.Surface:
     return pygame.image.load(filename)
 
 def load_assets() -> dict[str, pygame.Surface | pygame.font.Font]:
+    if not pygame.font.get_init():
+        pygame.font.init()
     return {
         "font":       pygame.font.Font(None, 32),
         "help_font":       pygame.font.Font(None, 22),
