@@ -5,18 +5,29 @@ and any timer or status messages. It should receive values from game state and
 draw them consistently without calculating collisions, movement, or scores.
 """
 
+import pygame
+
 HUD_COLOR = (255, 255, 255)
 LIFE_ICON_GAP = 8
 
 
-def draw_hud(window, font, level, score, lives, pac_image, timer):
+def draw_hud(
+    window: pygame.Surface,
+    font: pygame.font.Font,
+    level: int,
+    score: int,
+    lives: int,
+    pac_image: pygame.Surface,
+    timer: float,
+) -> None:
     """Draw the HUD with score, lives, and a countdown timer."""
     score_text = font.render(f"Score: {score}", True, HUD_COLOR)
     lives_text = font.render("Lives: ", True, HUD_COLOR)
     level_text = font.render(f"Level: {level}", True, HUD_COLOR)
     time_text = font.render("Time:", True, HUD_COLOR)
-    timer_text = font.render(f"{max(0, int(timer))}", True, HUD_COLOR
-                             if timer > 10 else (255, 0, 0))  # red if less than 10 seconds
+    timer_text = font.render(
+        f"{max(0, int(timer))}", True, HUD_COLOR if timer > 10 else (255, 0, 0)
+    )  # red if less than 10 seconds
 
     x = window.get_width() // 2
 
@@ -30,4 +41,3 @@ def draw_hud(window, font, level, score, lives, pac_image, timer):
         pac_x = x + i * (pac_image.get_width() + 10)
         pac_y = 10
         window.blit(pac_image, (pac_x + 70, pac_y))
-

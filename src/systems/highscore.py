@@ -10,25 +10,33 @@ import json
 import os
 from pydantic import BaseModel, ConfigDict, ValidationError, Field
 
+
+from typing import Any
+
+
 class Highscore(BaseModel):
+    """Model schema representing a validated high-score entry."""
     model_config = ConfigDict(extra="ignore")
     name: str = Field(min_length=2, max_length=10)
     score: int = Field(ge=0)
 
-def load_scores(filename: str) -> list[Highscore]:
 
+def load_scores(filename: str) -> list[dict[str, Any]]:
+    """Read and parse validated high scores from a JSON file."""
     try:
         with open(filename, "r") as f:
             content = f.read()
 
-        lines = [line for line in content.splitlines()
-                 if not line.strip().startswith("#")]
+        lines = [
+            line for line in content.splitlines()
+            if not line.strip().startswith("#")
+        ]
         raw = json.loads("\n".join(lines))
-            
+
         if not isinstance(raw, list):
             print(f"Warning: Invalid format in {filename}. ")
             return []
-        
+
         return [Highscore(**item).model_dump() for item in raw]
 
     except FileNotFoundError:
@@ -49,6 +57,7 @@ def load_scores(filename: str) -> list[Highscore]:
 
 
 def save_highscore(filename: str, player: str, score: int) -> None:
+    """Append a new score and persist top scores to the JSON file."""
     if not os.path.exists(filename):
         print(f"Warning: highscore file '{filename}' not found.")
         return
@@ -59,7 +68,9 @@ def save_highscore(filename: str, player: str, score: int) -> None:
             scores = []
 
         scores.append({"name": player, "score": score})
-        sorted_scores = sorted(scores, key=lambda x: x["score"], reverse=True)[:10]
+        sorted_scores = sorted(
+            scores, key=lambda x: x["score"], reverse=True
+        )[:10]
 
         with open(filename, "w") as f:
             json.dump(sorted_scores, f, indent=4)

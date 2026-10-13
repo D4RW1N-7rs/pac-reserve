@@ -7,27 +7,38 @@ and avoid embedding gameplay defaults in unrelated modules.
 """
 
 import json
+from typing import Any
 from pydantic import BaseModel, ConfigDict, ValidationError, Field
 
+
 class LevelConfig(BaseModel):
+    """Schema validation model for a single game level."""
     model_config = ConfigDict(extra="ignore")
     level: int = Field(default=1, gt=0)
     seed: int = Field(default=42, gt=0)
-    width: int = Field(default=15, gt=0, lt = 48)
-    height: int = Field(default=15, gt=0, lt = 24)
+    width: int = Field(default=15, gt=0, lt=48)
+    height: int = Field(default=15, gt=0, lt=24)
     level_max_time: int = Field(default=60, ge=0)
 
+
 class GameConfig(BaseModel):
+    """Schema validation model for global game configuration."""
     model_config = ConfigDict(extra="ignore")
-    highscore_filename: str = Field(default="data/highscore.json", min_length=1)
-    levels: list[LevelConfig] = Field(default_factory=lambda: [LevelConfig()], min_length=1)
+    highscore_filename: str = Field(
+        default="data/highscores.json", min_length=1
+    )
+    levels: list[LevelConfig] = Field(
+        default_factory=lambda: [LevelConfig()], min_length=1
+    )
     lives: int = Field(default=3, gt=0)
     pacgum: int = Field(default=420, ge=0)
     points_per_pacgum: int = Field(default=10, ge=0)
     points_per_super_pacgum: int = Field(default=50, ge=0)
     points_per_ghost: int = Field(default=200, ge=0)
 
-def load_config(filename: str) -> dict:
+
+def load_config(filename: str) -> dict[str, Any]:
+    """Load and validate JSON configuration file or return defaults."""
     default_config = GameConfig().model_dump()
 
     try:
@@ -35,30 +46,39 @@ def load_config(filename: str) -> dict:
             content = f.read()
 
         if not content.strip():
-            print(f"Warning: Config file '{filename}' is empty. "
-                  "Using default configuration.")
+            print(
+                f"Warning: Config file '{filename}' is empty. "
+                "Using default configuration."
+            )
             return default_config
 
-        lines = [line for line in content.splitlines()
-                 if not line.strip().startswith("#")]
+        lines = [
+            line for line in content.splitlines()
+            if not line.strip().startswith("#")
+        ]
         raw = json.loads("\n".join(lines))
-        
-        if not isinstance(raw, dict):
-            print(f"Warning: Invalid format in {filename}. "
-                  "Using default configuration.")
-            return default_config
 
+        if not isinstance(raw, dict):
+            print(
+                f"Warning: Invalid format in {filename}. "
+                "Using default configuration."
+            )
+            return default_config
 
         validate_config(raw)
 
         return GameConfig(**raw).model_dump()
-        
+
     except FileNotFoundError:
-        print(f"Warning: Config file '{filename}' not found. "
-              "Using default configuration.")
+        print(
+            f"Warning: Config file '{filename}' not found. "
+            "Using default configuration."
+        )
     except json.JSONDecodeError:
-        print(f"Warning: Invalid JSON syntax in '{filename}'. "
-              "Using default configuration.")
+        print(
+            f"Warning: Invalid JSON syntax in '{filename}'. "
+            "Using default configuration."
+        )
     except ValidationError as e:
         print("Invalid game configuration schema:")
         for err in e.errors(include_url=False):
@@ -66,15 +86,22 @@ def load_config(filename: str) -> dict:
             print(f"  - {loc}: {err['msg']}")
     except PermissionError:
         print(f"Permission denied when accessing {filename}")
-   
-        
+
     return default_config
 
-def validate_config(config_file: str | dict) -> bool:
-    config = load_config(config_file) if isinstance(config_file, str) else config_file
+
+def validate_config(config_file: str | dict[str, Any]) -> bool:
+    """Validate highscore file format in the loaded configuration."""
+    if isinstance(config_file, str):
+        config = load_config(config_file)
+    else:
+        config = config_file
     filename = config.get("highscore_filename", "")
     filename_parts = filename.split(".")
-    if len(filename_parts) != 2 or filename_parts[-1] not in ("txt", "json"):
-        print(f"High score file must have exactly one .txt or .json extension: {filename}")
+    if len(filename_parts) != 2 or filename_parts[-1] not in ("json"):
+        print(
+            "High score file must have exactly one .json extension: "
+            f"{filename}"
+        )
         raise SystemExit(1)
     return True

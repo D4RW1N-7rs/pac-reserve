@@ -3,6 +3,8 @@
 This module owns display window creation, point-in-box and coordinate math,
 and the main frame loop that dispatches events, updates, and rendering.
 """
+
+from typing import Any
 import pygame
 import time
 
@@ -35,7 +37,7 @@ def centered_y(image: pygame.Surface, window_height: int) -> int:
     return (window_height - image.get_height()) // 2
 
 
-def run_loop(game) -> None:
+def run_loop(game: Any) -> None:
     """Drive the main game loop, dispatching events, updates, and renders."""
     pygame.init()
 

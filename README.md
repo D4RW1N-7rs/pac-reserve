@@ -170,7 +170,7 @@ pacman/
   2. Player movement, grid constraints, and collectible generation.
   3. Ghost pathfinding algorithms (BFS) and behavioral states.
   4. State machine refactoring, engine decoupling, and menu UI.
-- **Dedicated Directory:** Scratch scripts, experiment logs, visual architecture sketches (`t.excalidraw`), and unit tests are organized inside the dedicated project management and testing directory [`.testing/`](file:///home/ohariss/Desktop/pacman/.testing) and [`.tests/`](file:///home/ohariss/Desktop/pacman/.tests).
+- **Dedicated Directory:** Full documentation covering timelines, progress tracking, technical choices, risk mitigation, and acceptance test logs is located in the dedicated [project_management/](file:///home/ohariss/Desktop/pacman/project_management/README.md) directory, alongside architecture sketches (`t.excalidraw`) and unit tests in [`.tests/`](file:///home/ohariss/Desktop/pacman/.tests).
 
 ---
 

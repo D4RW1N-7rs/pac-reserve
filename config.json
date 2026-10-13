@@ -1,5 +1,5 @@
 {
-  "highscore_filename": "data/highscore.json",
+  "highscore_filename": "data/highscores.json",
   "levels": [
     {
       "level": 1,

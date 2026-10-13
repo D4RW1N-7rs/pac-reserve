@@ -5,20 +5,34 @@ level effects using the selected UI toolkit. It should consume already-decided
 game state and avoid changing positions, scores, collisions, or positions.
 """
 
+from typing import Any
 import pygame
 
 WALL_COLOR = (33, 33, 222)
 WALL_THICK = 2
 HUD_HEIGHT = 60
-PADDING    = 16
-U, D, R, L = 1, 4, 2, 8   # bit SET = wall exists
+PADDING = 16
+U, D, R, L = 1, 4, 2, 8  # bit SET = wall exists
 
-def draw_rect(window: pygame.Surface, x: int, y: int, width: int, height: int, color: tuple[int, int, int]) -> None:
+
+def draw_rect(
+    window: pygame.Surface,
+    x: int,
+    y: int,
+    width: int,
+    height: int,
+    color: tuple[int, int, int],
+) -> None:
+    """Fill a rectangular area pixel-by-pixel with the given color."""
     for pixel_y in range(max(0, y), min(window.get_height(), y + height)):
         for pixel_x in range(max(0, x), min(window.get_width(), x + width)):
             window.set_at((pixel_x, pixel_y), color)
 
-def draw_maze(window, maze, tile):
+
+def draw_maze(
+    window: pygame.Surface, maze: list[list[int]], tile: int
+) -> None:
+    """Render the maze walls and solid blocks onto the window."""
     for y in range(len(maze)):
         for x in range(len(maze[0])):
             cell = maze[y][x]
@@ -32,14 +46,30 @@ def draw_maze(window, maze, tile):
             if cell & U:  # top wall exists
                 draw_rect(window, px, py, tile, WALL_THICK, WALL_COLOR)
             if cell & D:  # bottom wall exists
-                draw_rect(window, px, py + tile - WALL_THICK, tile, WALL_THICK, WALL_COLOR)
+                draw_rect(
+                    window, px, py + tile - WALL_THICK,
+                    tile, WALL_THICK, WALL_COLOR
+                )
             if cell & L:  # left wall exists
                 draw_rect(window, px, py, WALL_THICK, tile, WALL_COLOR)
             if cell & R:  # right wall exists
-                draw_rect(window, px + tile - WALL_THICK, py, WALL_THICK, tile, WALL_COLOR)
+                draw_rect(
+                    window, px + tile - WALL_THICK, py,
+                    WALL_THICK, tile, WALL_COLOR
+                )
 
-def draw_collectibles(window, gums, super_gums, gum_img, super_gum_img, tile, padding, hud_height):
-    
+
+def draw_collectibles(
+    window: pygame.Surface,
+    gums: list[Any],
+    super_gums: list[Any],
+    gum_img: pygame.Surface,
+    super_gum_img: pygame.Surface,
+    tile: int,
+    padding: int,
+    hud_height: int,
+) -> None:
+    """Render visible pacgums and super pacgums on the window."""
     for gum in gums:
         if gum.visible:
             # Center the image inside the tile
@@ -48,7 +78,7 @@ def draw_collectibles(window, gums, super_gums, gum_img, super_gum_img, tile, pa
             draw_x = gum.x * tile + padding + offset_x
             draw_y = gum.y * tile + hud_height + padding + offset_y
             window.blit(gum_img, (draw_x, draw_y))
-    
+
     for sgum in super_gums:
         if sgum.visible:
             # Same centering for super gums
@@ -57,5 +87,3 @@ def draw_collectibles(window, gums, super_gums, gum_img, super_gum_img, tile, pa
             draw_x = sgum.x * tile + padding + offset_x
             draw_y = sgum.y * tile + hud_height + padding + offset_y
             window.blit(super_gum_img, (draw_x, draw_y))
-
-
