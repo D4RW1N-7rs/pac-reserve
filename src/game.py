@@ -613,7 +613,7 @@ class PacmanGame:
                 title_img,
                 (
                     centered_x(title_img, self.new_w),
-                    centered_y(title_img, self.new_h),
+                    centered_y(title_img, self.new_h - 100),
                 ),
             )
         else:
@@ -622,11 +622,19 @@ class PacmanGame:
                 title_img,
                 (
                     centered_x(title_img, self.new_w),
-                    centered_y(title_img, self.new_h - 80),
+                    centered_y(title_img, self.new_h - 150),
                 ),
             )
 
         self.window.blit(save_img, (save_x, save_y))
+        score_text = self.font.render(f"Score: {self.score}", True, (0, 0, 0))
+        self.window.blit(
+            score_text,
+            (
+                centered_x(score_text, self.new_w),
+                centered_y(score_text, self.new_h + 40),
+            ),
+        )
         enter_name = self.font.render("Enter your name", True, (0, 0, 0))
         self.window.blit(
             enter_name,

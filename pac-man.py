@@ -12,8 +12,6 @@ from src.engine import run_loop
 import argparse
 
 CONFIG_FILE = "config.json"
-HIGHSCORE_FILE = "data/highscores.json"
-
 
 def parse_arguments() -> argparse.Namespace:
     """Parse command-line arguments."""
@@ -32,14 +30,8 @@ def main() -> None:
     """Parse CLI arguments, load config and highscores, and run the game."""
     args = parse_arguments()
     config = load_config(args.config_file)
-    highscore_file = (
-        config.get("highscore_filename", HIGHSCORE_FILE)
-        if config
-        else HIGHSCORE_FILE
-    )
+    highscore_file = (config.get("highscore_filename"))
     highscores = highscore.load_scores(highscore_file)
-    if not config or highscores is None:
-        return
 
     game = PacmanGame(config=config, highscores=highscores)
     run_loop(game)

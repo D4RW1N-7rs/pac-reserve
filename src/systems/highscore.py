@@ -7,7 +7,7 @@ from gameplay and the on-screen score display.
 """
 
 import json
-import os
+from pathlib import Path
 from pydantic import BaseModel, ConfigDict, ValidationError, Field
 
 
@@ -23,9 +23,14 @@ class Highscore(BaseModel):
 
 def load_scores(filename: str) -> list[dict[str, Any]]:
     """Read and parse validated high scores from a JSON file."""
+    path = Path(filename)
     try:
-        with open(filename, "r") as f:
-            content = f.read()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if not path.exists():
+            path.write_text("[]", encoding="utf-8")
+            return []
+
+        content = path.read_text(encoding="utf-8")
 
         lines = [
             line for line in content.splitlines()
@@ -39,9 +44,6 @@ def load_scores(filename: str) -> list[dict[str, Any]]:
 
         return [Highscore(**item).model_dump() for item in raw]
 
-    except FileNotFoundError:
-        print(f"Warning: highscore file '{filename}' not found.")
-        return []
     except json.JSONDecodeError:
         print(f"Warning: Invalid JSON syntax in '{filename}'. ")
         return []
@@ -51,17 +53,14 @@ def load_scores(filename: str) -> list[dict[str, Any]]:
             loc = ".".join(str(loc) for loc in err["loc"])
             print(f"  - {loc}: {err['msg']}")
         return []
-    except PermissionError:
-        print(f"Permission denied when accessing {filename}")
+    except OSError as error:
+        print(f"Could not access highscore file '{filename}': {error}")
         return []
 
 
 def save_highscore(filename: str, player: str, score: int) -> None:
     """Append a new score and persist top scores to the JSON file."""
-    if not os.path.exists(filename):
-        print(f"Warning: highscore file '{filename}' not found.")
-        return
-
+    path = Path(filename)
     try:
         scores = load_scores(filename)
         if scores is None:
@@ -72,8 +71,9 @@ def save_highscore(filename: str, player: str, score: int) -> None:
             scores, key=lambda x: x["score"], reverse=True
         )[:10]
 
-        with open(filename, "w") as f:
-            json.dump(sorted_scores, f, indent=4)
+        path.write_text(
+            json.dumps(sorted_scores, indent=4), encoding="utf-8"
+        )
 
-    except PermissionError:
-        print(f"Permission denied when accessing {filename}")
+    except OSError as error:
+        print(f"Could not save highscore file '{filename}': {error}")

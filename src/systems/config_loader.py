@@ -96,7 +96,9 @@ def validate_config(config_file: str | dict[str, Any]) -> bool:
         config = load_config(config_file)
     else:
         config = config_file
-    filename = config.get("highscore_filename", "")
+    filename = config.get(
+        "highscore_filename", GameConfig().highscore_filename
+    )
     filename_parts = filename.split(".")
     if len(filename_parts) != 2 or filename_parts[-1] != "json":
         print(
@@ -104,4 +106,5 @@ def validate_config(config_file: str | dict[str, Any]) -> bool:
             f"{filename}"
         )
         raise SystemExit(1)
+
     return True
