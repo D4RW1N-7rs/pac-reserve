@@ -98,7 +98,7 @@ def validate_config(config_file: str | dict[str, Any]) -> bool:
         config = config_file
     filename = config.get("highscore_filename", "")
     filename_parts = filename.split(".")
-    if len(filename_parts) != 2 or filename_parts[-1] not in ("json"):
+    if len(filename_parts) != 2 or filename_parts[-1] != "json":
         print(
             "High score file must have exactly one .json extension: "
             f"{filename}"
