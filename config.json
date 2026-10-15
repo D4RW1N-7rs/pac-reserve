@@ -6,21 +6,21 @@
       "seed": 42,
       "width": 15,
       "height": 15,
-      "level_max_time": 80
+      "level_max_time": 100
     },
     {
       "level": 2,
       "seed": 13,
       "width": 18,
       "height": 18,
-      "level_max_time": 100
+      "level_max_time": 120
     },
     {
       "level": 3,
       "seed": 37,
       "width": 20,
       "height": 20,
-      "level_max_time": 120
+      "level_max_time": 140
     },
     {
       "level": 4,
@@ -34,42 +34,42 @@
       "seed": 20,
       "width": 28,
       "height": 23,
-      "level_max_time": 180
+      "level_max_time": 200
     },
     {
       "level": 6,
       "seed": 26,
       "width": 34,
       "height": 23,
-      "level_max_time": 210
+      "level_max_time": 230
     },
     {
       "level": 7,
       "seed": 16,
       "width": 38,
       "height": 23,
-      "level_max_time": 240
+      "level_max_time": 260
     },
     {
       "level": 8,
       "seed": 8,
       "width": 40,
       "height": 23,
-      "level_max_time": 270
+      "level_max_time": 290
     },
     {
       "level": 9,
       "seed": 9,
       "width": 44,
       "height": 23,
-      "level_max_time": 300
+      "level_max_time": 320
     },
     {
       "level": 10,
       "seed": 40,
       "width": 47,
       "height": 23,
-      "level_max_time": 330
+      "level_max_time": 350
     }
   ],
   "lives": 3,
