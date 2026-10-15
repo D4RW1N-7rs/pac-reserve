@@ -16,8 +16,8 @@ class LevelConfig(BaseModel):
     model_config = ConfigDict(extra="ignore")
     level: int = Field(default=1, gt=0)
     seed: int = Field(default=42, gt=0)
-    width: int = Field(default=15, gt=0, lt=48)
-    height: int = Field(default=15, gt=0, lt=24)
+    width: int = Field(default=15, gt=7, lt=48)
+    height: int = Field(default=15, gt=7, lt=24)
     level_max_time: int = Field(default=60, ge=0)
 
 
