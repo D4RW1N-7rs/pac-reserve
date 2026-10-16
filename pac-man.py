@@ -13,6 +13,7 @@ import argparse
 
 CONFIG_FILE = "config.json"
 
+
 def parse_arguments() -> argparse.Namespace:
     """Parse command-line arguments."""
     arg_parser = argparse.ArgumentParser(description="Pac-Man Game.")
@@ -30,7 +31,7 @@ def main() -> None:
     """Parse CLI arguments, load config and highscores, and run the game."""
     args = parse_arguments()
     config = load_config(args.config_file)
-    highscore_file = (config.get("highscore_filename"))
+    highscore_file: str = config["highscore_filename"]
     highscores = highscore.load_scores(highscore_file)
 
     game = PacmanGame(config=config, highscores=highscores)

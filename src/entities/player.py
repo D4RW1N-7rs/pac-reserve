@@ -89,7 +89,6 @@ class Player:
             if is_blocked:
                 self.current_direction = "STOP"
 
-        # moves
         if self.current_direction == "UP":
             self.pixel_y -= self.speed
         elif self.current_direction == "DOWN":

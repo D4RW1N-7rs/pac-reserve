@@ -34,6 +34,10 @@ class Ghost:
         self.direction = "LEFT"
         self.speed = 4
         self.load_images()
+        self.frightened_image = pygame.image.load("img/ghosts/dead-ghost.png")
+        self.frightened_image2 = pygame.image.load(
+            "img/ghosts/dead-ghost-2.png"
+        )
 
     def load_images(self) -> None:
         """Load ghost images for each direction based on color."""
@@ -71,9 +75,9 @@ class Ghost:
 
         image = self.images[self.direction]
         if self.state == "FRIGHTENED":
-            image = pygame.image.load("img/ghosts/dead-ghost.png")
+            image = self.frightened_image
             if time.time() - self.frightened_timer >= FRIGHTENED_DURATION / 2:
-                image = pygame.image.load("img/ghosts/dead-ghost-2.png")
+                image = self.frightened_image2
 
         offset_x = (tile_size - image.get_width()) // 2
         offset_y = (tile_size - image.get_height()) // 2
@@ -106,37 +110,29 @@ class Ghost:
 
         while queue:
 
-            # TODO 3: take the oldest item out of the queue
             x, y, first_direction = queue.popleft()
 
-            # TODO 4: if this cell is the target, return the answer
             if (x, y) == target:
                 return first_direction
 
             for name, dx, dy, wall in directions:
-                # skip if the current cell has a wall on this side
                 cell = maze[y][x]
                 if cell & wall:
                     continue
 
-                # compute the neighbor's coordinates
                 next_cell_x = x + dx
                 next_cell_y = y + dy
 
-                # skip if out of bounds 'houdodo'
                 if not 0 <= next_cell_y < len(maze):
                     continue
                 if not 0 <= next_cell_x < len(maze[0]):
                     continue
 
-                # skip if already visited
                 if (next_cell_x, next_cell_y) in visited:
                     continue
-                # skip if the neighbor is a solid cell (15)
                 if maze[next_cell_y][next_cell_x] == 15:
                     continue
 
-                # mark visited, work out which first direction it carries,
                 visited.add((next_cell_x, next_cell_y))
 
                 if first_direction is None:
@@ -144,7 +140,6 @@ class Ghost:
                 else:
                     next_direction = first_direction
 
-                # and add it to the queue
                 queue.append((next_cell_x, next_cell_y, next_direction))
 
         return None
@@ -153,7 +148,6 @@ class Ghost:
         self, maze: list[list[int]], tile_size: int, pacman: Any
     ) -> None:
         """Update the ghost's position and state."""
-        # Check if frightened timer has expired → go back to CHASE
         if (
             self.state == "FRIGHTENED" or self.state == "EATEN"
         ) and time.time() - self.frightened_timer >= FRIGHTENED_DURATION:
@@ -162,7 +156,6 @@ class Ghost:
             else:
                 self.state = "CHASE"
                 self.speed = 4
-                # Snap to nearest tile so the ghost re-aligns to the grid.
                 self.pixel_x = round(self.pixel_x / tile_size) * tile_size
                 self.pixel_y = round(self.pixel_y / tile_size) * tile_size
 
@@ -171,8 +164,8 @@ class Ghost:
 
         if self.pixel_x % tile_size == 0 and self.pixel_y % tile_size == 0:
 
-            ghost_x = self.pixel_x // tile_size  # coordinate(x)
-            ghost_y = self.pixel_y // tile_size  # coordinate(y)
+            ghost_x = self.pixel_x // tile_size
+            ghost_y = self.pixel_y // tile_size
 
             if not (0 <= ghost_y < len(maze) and 0 <= ghost_x < len(maze[0])):
                 return
@@ -183,7 +176,7 @@ class Ghost:
                 return
 
             legal_moves = []
-            # Check bitwise wall flags for legal turns
+
             if not (cell & U):
                 legal_moves.append("UP")
             if not (cell & D):
@@ -222,7 +215,6 @@ class Ghost:
             elif self.direction not in legal_moves:
                 self.direction = random.choice(legal_moves)
 
-        # move
         if self.direction == "UP":
             self.pixel_y -= self.speed
         elif self.direction == "DOWN":
@@ -260,7 +252,6 @@ class Ghost:
                 target_x, target_y = pacman_x, pacman_y
 
         elif self.color == "cyan":
-            # Cyan flanks from BEHIND
             if pacman.current_direction == "UP":
                 target_x, target_y = pacman_x, pacman_y + 4
             elif pacman.current_direction == "DOWN":
@@ -273,7 +264,6 @@ class Ghost:
                 target_x, target_y = pacman_x, pacman_y
 
         elif self.color == "orange":
-            # Orange ghost targets Pac-Man if far away, else targets corner
             distance = (
                 (self.pixel_x - pacman.pixel_x) ** 2
                 + (self.pixel_y - pacman.pixel_y) ** 2
@@ -281,11 +271,11 @@ class Ghost:
             if distance > 4 * tile_size:
                 target_x, target_y = pacman_x, pacman_y
             else:
-                target_x, target_y = 0, maze_height - 1  # Bottom-left corner
+                target_x, target_y = 0, maze_height - 1
         else:
             target_x, target_y = 0, 0
 
-        # CLAMP target to maze bounds so BFS doesn't exhaust itself!
+        # BFS limit
         target_x = max(0, min(target_x, maze_width - 1))
         target_y = max(0, min(target_y, maze_height - 1))
 

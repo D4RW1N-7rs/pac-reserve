@@ -47,10 +47,8 @@ class Collectible:
     ) -> tuple[list["Collectible"], list["Collectible"]]:
         """Generate regular and super pacgums on valid maze tiles."""
 
-        # Step 1: Get all walkable cells
         valid_cells = Collectible.valid_gum_cells(maze)
 
-        # Step 2: Define the 4 super gum corner positions
         super_positions = [
             (0, 0),
             (0, height - 1),
@@ -58,19 +56,15 @@ class Collectible:
             (width - 1, height - 1),
         ]
 
-        # Step 3: Remove super gum spots from valid_cells so regular
-        # gums don't spawn there
         for pos in super_positions:
             if pos in valid_cells:
                 valid_cells.remove(pos)
 
-        # Step 4: Pick regular gum positions
         if pacgum_count >= len(valid_cells):
             chosen_positions = valid_cells
         else:
             chosen_positions = random.sample(valid_cells, pacgum_count)
 
-        # Step 5: Build the two lists of Collectible objects
         gums = []
         super_gums = []
         for pos in chosen_positions:
@@ -79,7 +73,6 @@ class Collectible:
             )
             gums.append(gum)
 
-        # TODO: Create super gum collectibles for each super position
         for pos in super_positions:
             if maze[pos[1]][pos[0]] != 15:
                 super_gum = Collectible(

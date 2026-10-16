@@ -72,7 +72,6 @@ def draw_collectibles(
     """Render visible pacgums and super pacgums on the window."""
     for gum in gums:
         if gum.visible:
-            # Center the image inside the tile
             offset_x = (tile - gum_img.get_width()) // 2
             offset_y = (tile - gum_img.get_height()) // 2
             draw_x = gum.x * tile + padding + offset_x
@@ -81,7 +80,6 @@ def draw_collectibles(
 
     for sgum in super_gums:
         if sgum.visible:
-            # Same centering for super gums
             offset_x = (tile - super_gum_img.get_width()) // 2
             offset_y = (tile - super_gum_img.get_height()) // 2
             draw_x = sgum.x * tile + padding + offset_x

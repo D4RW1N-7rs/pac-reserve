@@ -182,7 +182,7 @@ class PacmanGame:
         maze = create_maze(
             self.level_data["width"],
             self.level_data["height"],
-            self.level_data["seed"],
+            self.level_data["seed"]
         )
         self.maze = maze if maze is not None else []
 
@@ -199,8 +199,8 @@ class PacmanGame:
                 self.level_data["width"] - 2,
                 self.level_data["height"] - 2,
                 TILE,
-                "pink",
-            ),
+                "pink"
+            )
         ]
 
         start_x, start_y = find_middle_spawn(self.maze)
@@ -212,7 +212,7 @@ class PacmanGame:
             self.level_data["height"],
             self.config["pacgum"],
             self.config["points_per_pacgum"],
-            self.config["points_per_super_pacgum"],
+            self.config["points_per_super_pacgum"]
         )
 
         self.level_time_remaining = int(self.level_data["level_max_time"])
@@ -234,8 +234,8 @@ class PacmanGame:
                 self.level_data["width"] - 2,
                 self.level_data["height"] - 2,
                 TILE,
-                "pink",
-            ),
+                "pink"
+            )
         ]
         start_x, start_y = find_middle_spawn(self.maze)
         self.pacman = Player(start_x, start_y, TILE)
@@ -406,7 +406,6 @@ class PacmanGame:
             print(f"[CHEAT] Extra life! Lives: {self.lives}")
         elif key in (pygame.K_5, pygame.K_KP5):
             self.pacman.speed = 8 if self.pacman.speed == 5 else 5
-            # Snap to nearest tile boundary to re-align with grid modulo checks
             self.pacman.pixel_x = round(self.pacman.pixel_x / TILE) * TILE
             self.pacman.pixel_y = round(self.pacman.pixel_y / TILE) * TILE
             print(f"[CHEAT] Player speed: {self.pacman.speed}")

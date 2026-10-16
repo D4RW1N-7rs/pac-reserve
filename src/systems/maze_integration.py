@@ -21,4 +21,4 @@ def create_maze(
         return cast(list[list[int]], gen.maze)
     except Exception as e:
         print(f"Maze generator failed: {e}")
-        return None  # caller must handle None
+        return None
