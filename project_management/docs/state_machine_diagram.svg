@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 800" width="100%" height="100%" style="background-color: #0d1117; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <linearGradient id="stateGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1f2937" />
+      <stop offset="100%" stop-color="#111827" />
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="115%" height="115%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#58a6ff" />
+    </marker>
+    <marker id="ghostArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#f87171" />
+    </marker>
+  </defs>
+
+  <style>
+    .title { fill: #f0f6fc; font-size: 21px; font-weight: 700; }
+    .subtitle { fill: #8b949e; font-size: 13px; }
+    .section-title { fill: #58a6ff; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
+    .state-name { fill: #f0f6fc; font-size: 13px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; }
+    .trans-label { fill: #c9d1d9; font-size: 11px; font-family: 'SFMono-Regular', Consolas, monospace; }
+    .action-label { fill: #8b949e; font-size: 10px; font-family: 'SFMono-Regular', Consolas, monospace; }
+    .trans-line { stroke: #58a6ff; stroke-width: 1.6; fill: none; }
+    .ghost-line { stroke: #f87171; stroke-width: 1.6; fill: none; }
+    .panel { fill: #161b22; stroke: #30363d; stroke-width: 1.5; rx: 12; }
+  </style>
+
+  <!-- Title -->
+  <text x="500" y="38" class="title" text-anchor="middle">State Machine Diagram: Pac-Man Code Architecture</text>
+  <text x="500" y="58" class="subtitle" text-anchor="middle">Derived directly from GameState enum &amp; Ghost states in src/game.py and src/entities/ghost.py</text>
+
+  <!-- ==================== TOP PANEL: GAME APPLICATION STATES ==================== -->
+  <rect x="30" y="85" width="940" height="340" class="panel" filter="url(#shadow)" />
+  <text x="50" y="115" class="section-title">1. Game Controller State Machine (PacmanGame.current_state)</text>
+
+  <!-- Initial State -->
+  <circle cx="65" cy="220" r="10" fill="#58a6ff" />
+  <line x1="75" y1="220" x2="115" y2="220" class="trans-line" marker-end="url(#arrow)" />
+
+  <!-- State: MENU -->
+  <rect x="120" y="195" width="105" height="50" rx="8" fill="url(#stateGrad)" stroke="#58a6ff" stroke-width="2" />
+  <text x="172" y="220" class="state-name">MENU</text>
+
+  <!-- MENU -> HELP (Mouse Click) -->
+  <path d="M 172,195 L 172,145 L 315,145" class="trans-line" marker-end="url(#arrow)" />
+  <text x="180" y="140" class="trans-label">Click 'HELP' button</text>
+
+  <!-- State: HELP -->
+  <rect x="320" y="120" width="115" height="50" rx="8" fill="url(#stateGrad)" stroke="#8b949e" stroke-width="1.5" />
+  <text x="377" y="145" class="state-name">HELP</text>
+
+  <!-- HELP -> MENU -->
+  <path d="M 377,170 L 377,205 L 230,205" class="trans-line" marker-end="url(#arrow)" />
+  <text x="240" y="200" class="action-label">Click 'BACK'</text>
+
+  <!-- MENU -> HIGH_SCORES (Mouse Click) -->
+  <path d="M 172,245 L 172,295 L 315,295" class="trans-line" marker-end="url(#arrow)" />
+  <text x="180" y="290" class="trans-label">Click 'HIGHSCORES' button</text>
+
+  <!-- State: HIGH_SCORES -->
+  <rect x="320" y="270" width="130" height="50" rx="8" fill="url(#stateGrad)" stroke="#8b949e" stroke-width="1.5" />
+  <text x="385" y="295" class="state-name">HIGH_SCORES</text>
+
+  <!-- HIGH_SCORES -> MENU -->
+  <path d="M 385,270 L 385,235 L 230,235" class="trans-line" marker-end="url(#arrow)" />
+  <text x="240" y="248" class="action-label">Click 'BACK'</text>
+
+  <!-- MENU -> PLAYING (Click PLAY) -->
+  <line x1="225" y1="220" x2="515" y2="220" class="trans-line" marker-end="url(#arrow)" />
+  <text x="270" y="212" class="trans-label">Click 'PLAY' [start_level(0)]</text>
+
+  <!-- State: PLAYING -->
+  <rect x="520" y="195" width="125" height="50" rx="8" fill="url(#stateGrad)" stroke="#34d399" stroke-width="2" />
+  <text x="582" y="220" class="state-name">PLAYING</text>
+
+  <!-- PLAYING -> PAUSED (Key P or ESC) -->
+  <path d="M 560,195 C 560,140 605,140 605,195" class="trans-line" marker-end="url(#arrow)" />
+  <text x="582" y="148" class="trans-label" text-anchor="middle">Press 'P' or 'ESC'</text>
+
+  <!-- State: PAUSED -->
+  <rect x="525" y="285" width="115" height="50" rx="8" fill="url(#stateGrad)" stroke="#e3b341" stroke-width="1.8" />
+  <text x="582" y="310" class="state-name">PAUSED</text>
+
+  <!-- PLAYING to PAUSED line -->
+  <line x1="582" y1="245" x2="582" y2="280" class="trans-line" marker-end="url(#arrow)" />
+
+  <!-- PAUSED -> PLAYING (Click CONTINUE or Press P/ESC) -->
+  <path d="M 540,285 L 540,250" class="trans-line" marker-end="url(#arrow)" />
+  <text x="415" y="268" class="trans-label">Click 'CONTINUE' / Press 'P'/'ESC'</text>
+
+  <!-- PAUSED -> MENU (Click MENU) -->
+  <path d="M 525,320 L 172,320 L 172,250" class="trans-line" marker-end="url(#arrow)" />
+  <text x="280" y="335" class="action-label">Click 'MENU' button</text>
+
+  <!-- PLAYING -> GAME_OVER (lives <= 0 OR timer <= 0) -->
+  <path d="M 645,205 L 755,165" class="trans-line" marker-end="url(#arrow)" />
+  <text x="655" y="175" class="trans-label">lives &lt;= 0 OR timer &lt;= 0</text>
+
+  <!-- State: GAME_OVER -->
+  <rect x="760" y="140" width="130" height="50" rx="8" fill="url(#stateGrad)" stroke="#f87171" stroke-width="2" />
+  <text x="825" y="165" class="state-name">GAME_OVER</text>
+
+  <!-- PLAYING -> WINNER (All level gums eaten & last level cleared) -->
+  <path d="M 645,230 L 755,270" class="trans-line" marker-end="url(#arrow)" />
+  <text x="660" y="262" class="trans-label">all levels cleared</text>
+
+  <!-- State: WINNER -->
+  <rect x="760" y="245" width="130" height="50" rx="8" fill="url(#stateGrad)" stroke="#34d399" stroke-width="2" />
+  <text x="825" y="270" class="state-name">WINNER</text>
+
+  <!-- GAME_OVER / WINNER -> MENU (Click SAVE or Press ENTER) -->
+  <path d="M 890,165 L 945,165 L 945,390 L 140,390 L 140,250" class="trans-line" marker-end="url(#arrow)" />
+  <path d="M 890,270 L 945,270" class="trans-line" />
+  <text x="540" y="384" class="trans-label" text-anchor="middle">Input Name + Click 'SAVE' or Press ENTER [save_player_score()]</text>
+
+  <!-- ==================== BOTTOM PANEL: GHOST AI STATES ==================== -->
+  <rect x="30" y="445" width="940" height="320" class="panel" filter="url(#shadow)" />
+  <text x="50" y="475" class="section-title" fill="#f87171">2. Ghost State Machine (Ghost.state in src/entities/ghost.py)</text>
+
+  <!-- Ghost Initial -->
+  <circle cx="80" cy="590" r="10" fill="#f87171" />
+  <line x1="90" y1="590" x2="155" y2="590" class="ghost-line" marker-end="url(#ghostArrow)" />
+
+  <!-- State: CHASE -->
+  <rect x="160" y="560" width="160" height="60" rx="8" fill="url(#stateGrad)" stroke="#f87171" stroke-width="2" />
+  <text x="240" y="585" class="state-name">CHASE</text>
+  <text x="240" y="605" class="action-label">speed = 4, BFS to Pac-Man</text>
+
+  <!-- CHASE -> FRIGHTENED -->
+  <path d="M 320,580 L 510,580" class="ghost-line" marker-end="url(#ghostArrow)" />
+  <text x="330" y="572" class="trans-label">pacman eats super_gum</text>
+  <text x="330" y="595" class="action-label">ghost.frighten()</text>
+
+  <!-- State: FRIGHTENED -->
+  <rect x="515" y="555" width="180" height="70" rx="8" fill="url(#stateGrad)" stroke="#388bfd" stroke-width="2" />
+  <text x="605" y="580" class="state-name">FRIGHTENED</text>
+  <text x="605" y="600" class="action-label">speed = 2, timer = time.time()</text>
+
+  <!-- FRIGHTENED -> CHASE (Timer expiration) -->
+  <path d="M 605,555 C 605,510 240,510 240,555" class="ghost-line" marker-end="url(#ghostArrow)" />
+  <text x="420" y="525" class="trans-label" text-anchor="middle">now - frightened_timer &gt;= 7.0s [speed=4]</text>
+
+  <!-- FRIGHTENED -> EATEN (Collision with Pac-Man) -->
+  <line x1="695" y1="590" x2="775" y2="590" class="ghost-line" marker-end="url(#ghostArrow)" />
+  <text x="702" y="578" class="trans-label">ghost.collide(pacman)</text>
+  <text x="705" y="605" class="action-label">+200 pts, state="EATEN"</text>
+
+  <!-- State: EATEN -->
+  <rect x="780" y="560" width="160" height="60" rx="8" fill="url(#stateGrad)" stroke="#e3b341" stroke-width="2" />
+  <text x="860" y="585" class="state-name">EATEN</text>
+  <text x="860" y="605" class="action-label">Hidden (not drawn)</text>
+
+  <!-- EATEN -> CHASE (Timer expires -> reset to spawn) -->
+  <path d="M 860,620 C 860,720 240,720 240,625" class="ghost-line" marker-end="url(#ghostArrow)" />
+  <text x="550" y="710" class="trans-label" text-anchor="middle">now - frightened_timer &gt;= 7.0s -&gt; reset(tile_size) [pixel=(start_x, start_y), state="CHASE"]</text>
+
+</svg>

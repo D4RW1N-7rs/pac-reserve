@@ -11,6 +11,48 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, ValidationError, Field
 
 
+# In src/systems/config_loader.py
+
+_DEFAULT_CONFIG: dict[str, Any] = {
+    "highscore_filename": "data/highscores.json",
+    "lives": 3,
+    "pacgum": 420,
+    "points_per_pacgum": 10,
+    "points_per_super_pacgum": 50,
+    "points_per_ghost": 200,
+    "levels": [
+        {
+            "level": 1, "seed": 42, "width": 15, "height": 15,
+            "level_max_time": 100,
+        },
+        {
+            "level": 2, "seed": 13, "width": 18, "height": 18,
+            "level_max_time": 120,
+        },
+        {
+            "level": 3, "seed": 37, "width": 20, "height": 20,
+            "level_max_time": 140,
+        },
+        {
+            "level": 4, "seed": 22, "width": 23, "height": 23,
+            "level_max_time": 150,
+        },
+        {
+            "level": 5, "seed": 20, "width": 28, "height": 23,
+            "level_max_time": 200,
+        },
+        {
+            "level": 6, "seed": 26, "width": 34, "height": 23,
+            "level_max_time": 230,
+        },
+        {
+            "level": 7, "seed": 16, "width": 38, "height": 23,
+            "level_max_time": 250,
+        },
+    ]
+}
+
+
 class LevelConfig(BaseModel):
     """Schema validation model for a single game level."""
     model_config = ConfigDict(extra="ignore")
@@ -18,7 +60,7 @@ class LevelConfig(BaseModel):
     seed: int = Field(default=42, gt=0)
     width: int = Field(default=15, gt=7, lt=48)
     height: int = Field(default=15, gt=7, lt=24)
-    level_max_time: int = Field(default=60, ge=0)
+    level_max_time: int = Field(default=100, ge=0)
 
 
 class GameConfig(BaseModel):
@@ -39,7 +81,7 @@ class GameConfig(BaseModel):
 
 def load_config(filename: str) -> dict[str, Any]:
     """Load and validate JSON configuration file or return defaults."""
-    default_config = GameConfig().model_dump()
+    default_config = _DEFAULT_CONFIG.copy()
 
     try:
         with open(filename, "r") as f:
@@ -69,25 +111,16 @@ def load_config(filename: str) -> dict[str, Any]:
 
         return GameConfig(**raw).model_dump()
 
-    except FileNotFoundError:
-        print(
-            f"Warning: Config file '{filename}' not found. "
-            "Using default configuration."
-        )
-    except json.JSONDecodeError:
-        print(
-            f"Warning: Invalid JSON syntax in '{filename}'. "
-            "Using default configuration."
-        )
+    except (FileNotFoundError, json.JSONDecodeError, PermissionError) as e:
+        print(f"Warning: {e}. Falling back to default configuration.")
+        return default_config
     except ValidationError as e:
         print("Invalid game configuration schema:")
         for err in e.errors(include_url=False):
             loc = ".".join(str(loc) for loc in err["loc"])
             print(f"  - {loc}: {err['msg']}")
-    except PermissionError:
-        print(f"Permission denied when accessing {filename}")
-
-    return default_config
+        print("Falling back to default full configuration.")
+        return default_config
 
 
 def validate_config(config_file: str | dict[str, Any]) -> bool:

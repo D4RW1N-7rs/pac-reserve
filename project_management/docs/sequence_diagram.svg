@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 820" width="100%" height="100%" style="background-color: #0d1117; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <linearGradient id="seqBoxGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1f2937" />
+      <stop offset="100%" stop-color="#111827" />
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="115%" height="115%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#58a6ff" />
+    </marker>
+    <marker id="dashArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#8b949e" />
+    </marker>
+    <marker id="alertArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#f87171" />
+    </marker>
+  </defs>
+
+  <style>
+    .title { fill: #f0f6fc; font-size: 21px; font-weight: 700; }
+    .subtitle { fill: #8b949e; font-size: 13px; }
+    .lifeline-header { fill: #f0f6fc; font-size: 13px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; }
+    .lifeline { stroke: #30363d; stroke-width: 1.5; stroke-dasharray: 5,4; }
+    .active-bar { fill: #21262d; stroke: #58a6ff; stroke-width: 1.5; }
+    .msg-text { fill: #c9d1d9; font-size: 11px; font-family: 'SFMono-Regular', Consolas, monospace; }
+    .call-line { stroke: #58a6ff; stroke-width: 1.5; fill: none; }
+    .return-line { stroke: #8b949e; stroke-width: 1.4; stroke-dasharray: 4,4; fill: none; }
+    .frame-box { fill: #161b22; fill-opacity: 0.7; stroke: #388bfd; stroke-width: 1.2; stroke-dasharray: 4,3; }
+    .frame-tag { fill: #58a6ff; font-size: 11px; font-weight: 700; }
+  </style>
+
+  <!-- Title -->
+  <text x="530" y="38" class="title" text-anchor="middle">Sequence Diagram: Exact PacmanGame.update() &amp; Collisions</text>
+  <text x="530" y="58" class="subtitle" text-anchor="middle">Traced strictly from src/game.py, entities/player.py, and entities/ghost.py</text>
+
+  <!-- Lifeline Columns (Player/Keyboard=90, Game=270, Pacman=470, ModuleHelper=660, Ghost=860, HUD=1000) -->
+  
+  <g transform="translate(30, 85)" filter="url(#shadow)">
+    <rect width="120" height="40" rx="6" fill="url(#seqBoxGrad)" stroke="#58a6ff" stroke-width="1.5"/>
+    <text x="60" y="20" class="lifeline-header">:User / Input</text>
+  </g>
+  <line x1="90" y1="125" x2="90" y2="780" class="lifeline" />
+
+  <g transform="translate(205, 85)" filter="url(#shadow)">
+    <rect width="130" height="40" rx="6" fill="url(#seqBoxGrad)" stroke="#58a6ff" stroke-width="1.5"/>
+    <text x="65" y="20" class="lifeline-header">:PacmanGame</text>
+  </g>
+  <line x1="270" y1="125" x2="270" y2="780" class="lifeline" />
+
+  <g transform="translate(410, 85)" filter="url(#shadow)">
+    <rect width="120" height="40" rx="6" fill="url(#seqBoxGrad)" stroke="#e3b341" stroke-width="1.5"/>
+    <text x="60" y="20" class="lifeline-header">:Player</text>
+  </g>
+  <line x1="470" y1="125" x2="470" y2="780" class="lifeline" />
+
+  <g transform="translate(595, 85)" filter="url(#shadow)">
+    <rect width="130" height="40" rx="6" fill="url(#seqBoxGrad)" stroke="#34d399" stroke-width="1.5"/>
+    <text x="65" y="20" class="lifeline-header">:Module Helpers</text>
+  </g>
+  <line x1="660" y1="125" x2="660" y2="780" class="lifeline" />
+
+  <g transform="translate(795, 85)" filter="url(#shadow)">
+    <rect width="130" height="40" rx="6" fill="url(#seqBoxGrad)" stroke="#f87171" stroke-width="1.5"/>
+    <text x="65" y="20" class="lifeline-header">:Ghost (4x)</text>
+  </g>
+  <line x1="860" y1="125" x2="860" y2="780" class="lifeline" />
+
+  <!-- Activation Bars -->
+  <rect x="264" y="145" width="12" height="620" rx="2" class="active-bar" />
+
+  <!-- Step 1: Input -->
+  <line x1="90" y1="155" x2="264" y2="155" class="call-line" marker-end="url(#arrow)" />
+  <text x="105" y="148" class="msg-text">handle_key_down(event) [WASD/Arrows]</text>
+
+  <line x1="276" y1="175" x2="470" y2="175" class="call-line" marker-end="url(#arrow)" />
+  <text x="290" y="168" class="msg-text">handle_input(event) -> next_direction</text>
+
+  <!-- Step 2: Game Loop Update -->
+  <line x1="276" y1="210" x2="470" y2="210" class="call-line" marker-end="url(#arrow)" />
+  <text x="290" y="203" class="msg-text">pacman.update(maze, TILE)</text>
+
+  <!-- Step 3: Collectibles Checking -->
+  <line x1="276" y1="245" x2="660" y2="245" class="call-line" marker-end="url(#arrow)" />
+  <text x="290" y="238" class="msg-text">eat_collectibles(pacman, gums, super_gums, TILE)</text>
+
+  <line x1="660" y1="275" x2="276" y2="275" class="return-line" marker-end="url(#dashArrow)" />
+  <text x="320" y="268" class="msg-text">returns (points_won, super_eaten)</text>
+
+  <!-- Opt: Super eaten -->
+  <rect x="230" y="295" width="670" height="60" rx="6" class="frame-box" />
+  <text x="240" y="310" class="frame-tag">opt [super_eaten == True]</text>
+  <line x1="276" y1="330" x2="860" y2="330" stroke="#f0883e" stroke-width="1.5" marker-end="url(#arrow)" />
+  <text x="330" y="323" class="msg-text" fill="#f0883e">for ghost in ghosts: ghost.frighten() [state="FRIGHTENED", timer=now]</text>
+
+  <!-- Step 4: Ghost Update -->
+  <line x1="276" y1="380" x2="860" y2="380" class="call-line" marker-end="url(#arrow)" />
+  <text x="330" y="373" class="msg-text">[if not ghosts_frozen] ghost.update(maze, TILE, pacman)</text>
+
+  <!-- Step 5: Collision Detection -->
+  <line x1="276" y1="415" x2="860" y2="415" class="call-line" marker-end="url(#arrow)" />
+  <text x="330" y="408" class="msg-text">ghost.collide(pacman)</text>
+
+  <!-- Alt: Collision handling -->
+  <rect x="230" y="440" width="790" height="230" rx="6" class="frame-box" />
+  <text x="240" y="456" class="frame-tag">alt [ghost.collide(pacman) == True]</text>
+
+  <!-- Alt 1: Ghost FRIGHTENED -->
+  <line x1="276" y1="480" x2="860" y2="480" class="call-line" marker-end="url(#arrow)" />
+  <text x="300" y="473" class="msg-text">[ghost.state == "FRIGHTENED"] score += 200, ghost.state = "EATEN"</text>
+
+  <!-- Divider -->
+  <line x1="230" y1="505" x2="1020" y2="505" stroke="#388bfd" stroke-dasharray="2,2" />
+  <text x="240" y="522" class="frame-tag">[else and not invincible]</text>
+
+  <line x1="276" y1="545" x2="276" y2="545" class="call-line" />
+  <text x="290" y="538" class="msg-text">lives -= 1</text>
+
+  <line x1="276" y1="575" x2="470" y2="575" stroke="#f87171" stroke-width="1.5" marker-end="url(#alertArrow)" />
+  <text x="290" y="568" class="msg-text" fill="#f87171">[lives &gt; 0] respawn_after_death() [reset pacman &amp; ghosts]</text>
+
+  <line x1="276" y1="610" x2="276" y2="610" class="call-line" />
+  <text x="290" y="603" class="msg-text">[lives &lt;= 0] current_state = GameState.GAME_OVER</text>
+
+  <line x1="276" y1="640" x2="276" y2="640" class="call-line" />
+  <text x="290" y="633" class="msg-text">[timer &lt;= 0] current_state = GameState.GAME_OVER</text>
+
+  <!-- Frame draw -->
+  <line x1="276" y1="710" x2="660" y2="710" class="call-line" marker-end="url(#arrow)" />
+  <text x="320" y="703" class="msg-text">draw(): menus / draw_maze() / draw_collectibles() / draw_hud()</text>
+
+  <line x1="276" y1="745" x2="90" y2="745" class="return-line" marker-end="url(#dashArrow)" />
+  <text x="140" y="738" class="msg-text">pygame.display.flip()</text>
+
+</svg>

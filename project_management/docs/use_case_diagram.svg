@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 780" width="100%" height="100%" style="background-color: #0d1117; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <linearGradient id="sysGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#161b22" />
+      <stop offset="100%" stop-color="#0e131a" />
+    </linearGradient>
+
+    <linearGradient id="ucGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1f2937" />
+      <stop offset="100%" stop-color="#111827" />
+    </linearGradient>
+
+    <filter id="shadow" x="-5%" y="-5%" width="115%" height="115%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+
+    <marker id="dashArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#8b949e" />
+    </marker>
+  </defs>
+
+  <style>
+    .title { fill: #f0f6fc; font-size: 20px; font-weight: 700; letter-spacing: 0.5px; }
+    .subtitle { fill: #8b949e; font-size: 13px; }
+    .boundary-title { fill: #58a6ff; font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+    .actor-label { fill: #f0f6fc; font-size: 14px; font-weight: 600; text-anchor: middle; }
+    .actor-sub { fill: #8b949e; font-size: 11px; text-anchor: middle; }
+    .uc-text { fill: #f0f6fc; font-size: 13px; font-weight: 500; text-anchor: middle; dominant-baseline: middle; }
+    .tag-text { fill: #8b949e; font-size: 10px; font-style: italic; text-anchor: middle; }
+    .relation-line { stroke: #58a6ff; stroke-width: 1.6; fill: none; opacity: 0.85; }
+    .include-line { stroke: #8b949e; stroke-width: 1.4; stroke-dasharray: 5,4; fill: none; }
+  </style>
+
+  <!-- Title Header -->
+  <text x="475" y="40" class="title" text-anchor="middle">Use Case Diagram: PacmanGame System</text>
+  <text x="475" y="62" class="subtitle" text-anchor="middle">Derived directly from UI button callbacks and player controls</text>
+
+  <!-- System Boundary Box -->
+  <rect x="230" y="85" width="490" height="660" rx="16" fill="url(#sysGrad)" stroke="#30363d" stroke-width="2" filter="url(#shadow)" />
+  <rect x="230" y="85" width="490" height="38" rx="16" fill="#21262d" />
+  <rect x="230" y="107" width="490" height="16" fill="#21262d" />
+  <text x="250" y="110" class="boundary-title">System Boundary (PacmanGame Engine)</text>
+
+  <!-- ACTOR: PLAYER (Left) -->
+  <g id="actor-player" transform="translate(100, 360)">
+    <circle cx="0" cy="-45" r="16" fill="#1f2937" stroke="#58a6ff" stroke-width="2.5" />
+    <line x1="0" y1="-29" x2="0" y2="15" stroke="#58a6ff" stroke-width="2.5" />
+    <line x1="-28" y1="-10" x2="28" y2="-10" stroke="#58a6ff" stroke-width="2.5" />
+    <line x1="0" y1="15" x2="-22" y2="52" stroke="#58a6ff" stroke-width="2.5" />
+    <line x1="0" y1="15" x2="22" y2="52" stroke="#58a6ff" stroke-width="2.5" />
+    <text x="0" y="78" class="actor-label">Player</text>
+    <text x="0" y="94" class="actor-sub">(User)</text>
+  </g>
+
+  <!-- ACTOR: HIGHSCORE JSON (Right) -->
+  <g id="actor-storage" transform="translate(845, 540)">
+    <rect x="-22" y="-55" width="44" height="38" rx="4" fill="#1f2937" stroke="#34d399" stroke-width="2.5" />
+    <line x1="-22" y1="-43" x2="22" y2="-43" stroke="#34d399" stroke-width="1.5" />
+    <line x1="-22" y1="-31" x2="22" y2="-31" stroke="#34d399" stroke-width="1.5" />
+    <line x1="0" y1="-17" x2="0" y2="15" stroke="#34d399" stroke-width="2.5" />
+    <line x1="-28" y1="-5" x2="28" y2="-5" stroke="#34d399" stroke-width="2.5" />
+    <line x1="0" y1="15" x2="-22" y2="52" stroke="#34d399" stroke-width="2.5" />
+    <line x1="0" y1="15" x2="22" y2="52" stroke="#34d399" stroke-width="2.5" />
+    <text x="0" y="78" class="actor-label">JSON Storage</text>
+    <text x="0" y="94" class="actor-sub">(data/highscores.json)</text>
+  </g>
+
+  <!-- ==================== USE CASES ==================== -->
+  <!-- UC1: Click Play Button -->
+  <g id="uc-start" filter="url(#shadow)">
+    <ellipse cx="365" cy="155" rx="90" ry="26" fill="url(#ucGrad)" stroke="#58a6ff" stroke-width="1.8" />
+    <text x="365" y="155" class="uc-text">Click 'PLAY' Button</text>
+  </g>
+
+  <!-- UC2: Move Pac-Man -->
+  <g id="uc-move" filter="url(#shadow)">
+    <ellipse cx="365" cy="235" rx="95" ry="26" fill="url(#ucGrad)" stroke="#58a6ff" stroke-width="1.8" />
+    <text x="365" y="235" class="uc-text">Steer (WASD / Arrows)</text>
+  </g>
+
+  <!-- UC3: Toggle Pause -->
+  <g id="uc-pause" filter="url(#shadow)">
+    <ellipse cx="365" cy="315" rx="90" ry="26" fill="url(#ucGrad)" stroke="#58a6ff" stroke-width="1.8" />
+    <text x="365" y="315" class="uc-text">Pause Game (P / ESC)</text>
+  </g>
+
+  <!-- UC4: Eat Gums -->
+  <g id="uc-pellets" filter="url(#shadow)">
+    <ellipse cx="365" cy="395" rx="95" ry="26" fill="url(#ucGrad)" stroke="#58a6ff" stroke-width="1.8" />
+    <text x="365" y="395" class="uc-text">Eat Gums (Pacgum)</text>
+  </g>
+
+  <!-- UC5: Eat Super Pacgum -->
+  <g id="uc-power" filter="url(#shadow)">
+    <ellipse cx="585" cy="395" rx="90" ry="26" fill="url(#ucGrad)" stroke="#e3b341" stroke-width="1.8" />
+    <text x="585" y="395" class="uc-text">Eat Super Pacgum</text>
+  </g>
+
+  <!-- UC6: Eat Frightened Ghost -->
+  <g id="uc-eat-ghost" filter="url(#shadow)">
+    <ellipse cx="585" cy="475" rx="90" ry="26" fill="url(#ucGrad)" stroke="#e3b341" stroke-width="1.8" />
+    <text x="585" y="475" class="uc-text">Eat Frightened Ghost</text>
+  </g>
+
+  <!-- UC7: View High Scores / Help Menu -->
+  <g id="uc-nav" filter="url(#shadow)">
+    <ellipse cx="365" cy="485" rx="95" ry="26" fill="url(#ucGrad)" stroke="#58a6ff" stroke-width="1.8" />
+    <text x="365" y="485" class="uc-text">Browse Help / Scores</text>
+  </g>
+
+  <!-- UC8: Save Player Score -->
+  <g id="uc-save-score" filter="url(#shadow)">
+    <ellipse cx="585" cy="565" rx="90" ry="26" fill="url(#ucGrad)" stroke="#34d399" stroke-width="1.8" />
+    <text x="585" y="565" class="uc-text">Input Name &amp; Save Score</text>
+  </g>
+
+  <!-- UC9: Apply Cheat Codes -->
+  <g id="uc-cheat" filter="url(#shadow)">
+    <ellipse cx="365" cy="590" rx="95" ry="26" fill="url(#ucGrad)" stroke="#8957e5" stroke-width="1.8" />
+    <text x="365" y="590" class="uc-text">Apply Cheats (1-5)</text>
+  </g>
+
+  <!-- ==================== ASSOCIATIONS ==================== -->
+  <line x1="130" y1="360" x2="275" y2="155" class="relation-line" />
+  <line x1="130" y1="360" x2="270" y2="235" class="relation-line" />
+  <line x1="130" y1="360" x2="275" y2="315" class="relation-line" />
+  <line x1="130" y1="360" x2="270" y2="395" class="relation-line" />
+  <line x1="130" y1="360" x2="270" y2="485" class="relation-line" />
+  <line x1="130" y1="360" x2="270" y2="590" class="relation-line" />
+
+  <!-- Storage Association -->
+  <line x1="815" y1="540" x2="675" y2="565" stroke="#34d399" stroke-width="1.6" />
+  <line x1="815" y1="540" x2="460" y2="485" stroke="#34d399" stroke-width="1.4" stroke-dasharray="4,4" />
+
+  <!-- ==================== INCLUDES & EXTENDS ==================== -->
+  <!-- Eat Gums -<<extend>>-> Eat Super Pacgum -->
+  <line x1="460" y1="395" x2="495" y2="395" class="include-line" marker-end="url(#dashArrow)" />
+  <rect x="455" y="380" width="50" height="15" rx="3" fill="#161b22" />
+  <text x="480" y="391" class="tag-text">&lt;&lt;extend&gt;&gt;</text>
+
+  <!-- Eat Super Pacgum -<<extend>>-> Eat Frightened Ghost -->
+  <line x1="585" y1="421" x2="585" y2="445" class="include-line" marker-end="url(#dashArrow)" />
+  <rect x="555" y="425" width="60" height="15" rx="3" fill="#161b22" />
+  <text x="585" y="436" class="tag-text">&lt;&lt;extend&gt;&gt;</text>
+
+</svg>
